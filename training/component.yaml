@@ -1,0 +1,45 @@
+name: Run weaver
+description: A Kubeflow pipeline component for running weaver
+metadata:
+  labels:
+    add-pod-env: 'true'
+inputs:
+  - name: parameters
+    type: String
+  - name: timestamp
+    type: String
+  - name: data_train
+    type: String
+  - name: data_val
+    type: String
+  - name: data_test
+    type: String
+  - name: network_config
+    type: String
+  - name: data_config
+    type: String
+  - name: model_prefix
+    type: String
+  - name: log
+    type: String
+outputs:
+  - name: MLPipeline UI metadata
+    type: UI metadata
+implementation:
+  container:
+    image: registry.cern.ch/ml/jec-training:latest
+    args: [
+      --parameters, {inputValue: parameters},
+      --timestamp, {inputValue: timestamp},
+      --data-train, {inputValue: data_train},
+      --data-val, {inputValue: data_val},
+      --data-test, {inputValue: data_test},
+      --network-config, {inputValue: network_config},
+      --data-config, {inputValue: data_config},
+      --model-prefix, {inputValue: model_prefix},
+      --log, {inputValue: log},
+    ]
+    env:
+      KFP_POD_NAME: '{{pod.name}}'
+    fileOutputs:
+      MLPipeline UI metadata: /mlpipeline-ui-metadata.json
