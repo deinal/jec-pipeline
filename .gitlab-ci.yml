@@ -1,0 +1,51 @@
+stages:
+  - build
+  - release
+
+build:weaver:
+  stage: build
+  tags:
+    - docker-image-build
+  script: ignore
+  variables:
+    TO: $CI_REGISTRY_IMAGE/weaver:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}
+    CONTEXT_DIR: "./training/weaver"
+    DOCKER_FILE: "Dockerfile"
+    NO_CACHE: "0"
+
+release:weaver:
+  stage: release
+  tags:
+    - docker-image-build
+  script: ignore
+  variables:
+    TO: $CI_REGISTRY_IMAGE/weaver:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}
+    CONTEXT_DIR: "./training/weaver"
+    DOCKER_FILE: "Dockerfile"
+    NO_CACHE: "0"
+  only:
+    - master
+
+build:training:
+  stage: build
+  tags:
+    - docker-image-build
+  script: ignore
+  variables:
+    TO: $CI_REGISTRY_IMAGE/training:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}
+    CONTEXT_DIR: "./training"
+    DOCKER_FILE: "Dockerfile"
+    NO_CACHE: "0"
+
+release:training:
+  stage: release
+  tags:
+    - docker-image-build
+  script: ignore
+  variables:
+    TO: $CI_REGISTRY_IMAGE/training:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}
+    CONTEXT_DIR: "./training"
+    DOCKER_FILE: "Dockerfile"
+    NO_CACHE: "0"
+  only:
+    - master
