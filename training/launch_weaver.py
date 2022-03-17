@@ -1,6 +1,7 @@
 import argparse
 import kubernetes
 from kubernetes import client
+import pathlib2
 import yaml
 import json
 import kfp
@@ -21,6 +22,7 @@ parser.add_argument('--network-config')
 parser.add_argument('--data-config')
 parser.add_argument('--model-prefix')
 parser.add_argument('--log')
+parser.add_argument('--output-path')
 args = parser.parse_args()
 print(vars(args))
 
@@ -86,13 +88,16 @@ while True:
             print(status['currentOptimalTrial'])
             break
 
-# k8s_co_client.delete_namespaced_custom_object(
-#     group='kubeflow.org',
-#     version='v1alpha3',
-#     namespace=namespace,
-#     plural='experiments',
-#     name=name,
-#     body=client.V1DeleteOptions()
-# )
+pathlib2.Path(args.output_path).parent.mkdir(parents=True)
+pathlib2.Path(args.output_path).write_text('s3://jec-data/tmp')
 
-# print(f'Experiment {name} deleted')
+k8s_co_client.delete_namespaced_custom_object(
+    group='kubeflow.org',
+    version='v1alpha3',
+    namespace=namespace,
+    plural='experiments',
+    name=name,
+    body=client.V1DeleteOptions()
+)
+
+print(f'Experiment {name} deleted')

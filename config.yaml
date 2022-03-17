@@ -1,4 +1,5 @@
-name: "jec-trial"
+job_name: jec-trial
+model_name: pfn
 network_config: networks/pfn_regressor.py
 data_config: data/jec_pfn.yaml
 model_prefix: outputs/{auto}/net

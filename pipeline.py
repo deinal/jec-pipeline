@@ -20,6 +20,17 @@ def load_cookies(cookie_file, domain):
             break
     return cookies
 
+def read_config_file(config_file):
+    with open(config_file) as f:
+        config = yaml.safe_load(f)
+
+    config['parameters'] = json.dumps(config['parameters'])
+    config['data']['train'] = ' '.join(config['data']['train'])
+    config['data']['val'] = ' '.join(config['data']['val'])
+    config['data']['test'] = ' '.join(config['data']['test'])
+    
+    return config
+
 @dsl.pipeline(name=pipeline_name, description=description)
 def pipeline(
     parameters: str,
@@ -31,6 +42,7 @@ def pipeline(
     data_config: str,
     model_prefix: str,
     log: str,
+    model_name: str,
 ):
 
     train = train_op(
@@ -45,9 +57,14 @@ def pipeline(
         log=log,
     )
 
+    serve = serve_op(
+        model_path=train.outputs['output_path'],
+        model_name=model_name,
+    )
 
 if __name__ == '__main__':
     train_op = kfp.components.load_component_from_file('training/component.yaml')
+    serve_op = kfp.components.load_component_from_file('serving/component.yaml')
 
     cookies = load_cookies(cookie_file='cookies.txt', domain='ml.cern.ch')
     
@@ -59,31 +76,23 @@ if __name__ == '__main__':
 
     experiment = client.create_experiment(name='jec-experiment', namespace='daniel-holmberg')
 
-    with open('config.yaml') as f:
-        config = yaml.safe_load(f)
-    
-    name = config['name']
-
-    parameters = json.dumps(config['parameters'])
-
-    data_train = ' '.join(config['data']['train'])
-    data_val = ' '.join(config['data']['val'])
-    data_test = ' '.join(config['data']['test'])
+    config = read_config_file(config_file='config.yaml')
 
     run = client.run_pipeline(
         pipeline_package_path=package_path,
         experiment_id=experiment.id,
-        job_name=name,
+        job_name=config['job_name'],
         params={
-            'parameters': parameters,
             'timestamp': timestamp,
-            'data_train': data_train,
-            'data_val': data_val,
-            'data_test': data_test,
+            'parameters': config['parameters'],
+            'data_train': config['data']['train'],
+            'data_val': config['data']['val'],
+            'data_test': config['data']['test'],
             'network_config': config['network_config'],
             'data_config': config['data_config'],
             'model_prefix': config['model_prefix'],
             'log': config['log'],
+            'model_name': config['model_name']
         }
     )
 
