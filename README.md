@@ -12,6 +12,8 @@ Changes are put into containers stored on CERN's [own registry](https://registry
 docker login registry.cern.ch
 docker build training -t registry.cern.ch/ml/jec-training
 docker push registry.cern.ch/ml/jec-training
+docker build serving -t registry.cern.ch/ml/jec-serving
+docker push registry.cern.ch/ml/jec-serving
 ```
 
 ## Data
@@ -25,6 +27,14 @@ kinit <cernid>
 kubectl delete secret krb-secret
 kubectl create secret generic krb-secret --from-file=/tmp/krb5cc_1000
 ```
+
+Create s3 secret on Kubeflow
+  - Put aws secrets into `secret.yaml` (e.g. from `openstack ec2 credentials list`) 
+  - `kubectl apply -f secret.yaml`
+
+## Exporting
+
+python3 train.py -c data/jec_pfn.yaml -n networks/pfn_regressor.py -m outputs/20220315-161332_pfn_regressor_ranger_lr0.005_batch100/net_best_epoch_state.pt --export-onnx model/model.onnx
 
 ## Run Pipeline
 

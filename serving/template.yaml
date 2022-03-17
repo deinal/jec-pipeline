@@ -1,0 +1,11 @@
+apiVersion: "serving.kubeflow.org/v1alpha2"
+kind: "InferenceService"
+metadata:
+  name: MODEL_NAME
+  namespace: NAMESPACE
+spec:
+  default:
+    predictor:
+      serviceAccountName: "sa"
+      onnx:
+        storageUri: STORAGE_URI

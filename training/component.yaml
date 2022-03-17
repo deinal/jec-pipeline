@@ -23,22 +23,36 @@ inputs:
   - name: log
     type: String
 outputs:
+  - name: output_path
+    type: String
   - name: MLPipeline UI metadata
     type: UI metadata
 implementation:
   container:
     image: registry.cern.ch/ml/jec-training:latest
-    args: [
-      --parameters, {inputValue: parameters},
-      --timestamp, {inputValue: timestamp},
-      --data-train, {inputValue: data_train},
-      --data-val, {inputValue: data_val},
-      --data-test, {inputValue: data_test},
-      --network-config, {inputValue: network_config},
-      --data-config, {inputValue: data_config},
-      --model-prefix, {inputValue: model_prefix},
-      --log, {inputValue: log},
-    ]
+    command:
+      - python3
+      - launch_weaver.py
+      - --parameters
+      - inputValue: parameters
+      - --timestamp
+      - inputValue: timestamp
+      - --data-train
+      - inputValue: data_train
+      - --data-val
+      - inputValue: data_val
+      - --data-test
+      - inputValue: data_test
+      - --network-config
+      - inputValue: network_config
+      - --data-config
+      - inputValue: data_config
+      - --model-prefix
+      - inputValue: model_prefix
+      - --log
+      - inputValue: log
+      - --output-path
+      - outputPath: output_path
     env:
       KFP_POD_NAME: '{{pod.name}}'
     fileOutputs:
