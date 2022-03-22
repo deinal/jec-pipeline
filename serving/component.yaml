@@ -14,7 +14,7 @@ implementation:
     image: registry.cern.ch/ml/jec-serving:latest
     command:
       - python3
-      - /ml/serve_model.py
+      - serve_model.py
       - --model_name
       - inputValue: model_name
       - --model_path
