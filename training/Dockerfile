@@ -20,6 +20,6 @@ RUN pip3 install kubernetes pathlib2
 
 WORKDIR /training
 COPY launch_weaver.py .
-COPY weaver/job.yaml weaver/
+COPY pfn.yaml .
 
 ENTRYPOINT ["python3", "launch_weaver.py"]

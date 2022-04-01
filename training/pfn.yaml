@@ -1,0 +1,138 @@
+apiVersion: kubeflow.org/v1beta1
+kind: Experiment
+metadata:
+  name:
+  namespace:
+spec:
+  parallelTrialCount: 2
+  maxTrialCount: 4
+  maxFailedTrialCount: 1
+  objective:
+    type: minimize
+    objectiveMetricName: Loss
+    additionalMetricNames:
+      - AvgLoss
+      - MSE
+      - AvgMSE
+      - MAE
+      - AvgMAE
+  algorithm:
+    algorithmName: random
+  metricsCollectorSpec:
+    collector:
+      kind: StdOut
+  parameters:
+    - name: start-lr
+      parameterType: double
+      feasibleSpace:
+        min: "1.0e-5"
+        max: "1.0e-4"
+    - name: optimizer
+      parameterType: categorical
+      feasibleSpace:
+        list:
+          - "adam"
+          - "adamW"
+          - "ranger"
+    - name: num-epochs
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "1"
+    - name: batch-size
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "100"
+    - name: data-fraction
+      parameterType: categorical
+      feasibleSpace:
+        list:
+          - "0.001"
+  trialTemplate:
+    primaryContainerName: pytorch
+    trialParameters:
+      - name: startLr
+        reference: start-lr
+        description: ""
+      - name: optimizer
+        reference: optimizer
+        description: ""
+      - name: numEpochs
+        reference: num-epochs
+        description: ""
+      - name: batchSize
+        reference: batch-size
+        description: ""
+      - name: dataFraction
+        reference: data-fraction
+        description: ""
+    trialSpec:
+      apiVersion: kubeflow.org/v1
+      kind: PyTorchJob
+      spec:
+        pytorchReplicaSpecs:
+          Master:
+            replicas: 1
+            restartPolicy: OnFailure
+            template:
+              metadata:
+                annotations:
+                  sidecar.istio.io/inject: "false"
+              spec:
+                volumes:
+                  - name: eos
+                    hostPath:
+                      path: /var/eos
+                  - name: krb-secret-vol
+                    secret:
+                      secretName: krb-secret
+                  - name: nvidia-driver
+                    hostPath:
+                      path: /opt/nvidia-driver
+                      type: ""
+                containers:
+                  - name: pytorch
+                    resources: 
+                      limits:
+                        cpu: 1
+                        memory:  1Gi
+                    volumeMounts:
+                      - name: eos
+                        mountPath: /eos
+                      - name: krb-secret-vol
+                        mountPath: /secret/krb-secret-vol
+                      - name: nvidia-driver
+                        mountPath: /opt/nvidia-driver
+                    env:
+                      - name: AWS_ACCESS_KEY_ID
+                        valueFrom:
+                          secretKeyRef:
+                            key: AWS_ACCESS_KEY_ID
+                            name: s3-secret
+                      - name: AWS_SECRET_ACCESS_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            key: AWS_SECRET_ACCESS_KEY
+                            name: s3-secret
+                    image: registry.cern.ch/ml/weaver:latest
+                    command:
+                      - python
+                      - train.py
+                    args:
+                      - --gpus=
+                      - --num-workers=1
+                      - --regression-mode
+                      - --s3-endpoint=https://s3.cern.ch
+                      - --data-train=jec-data/001.root
+                      - --data-val=jec-data/002.root
+                      - --data-test=jec-data/003.root
+                      - --network-config=networks/pfn_regressor.py
+                      - --data-config=data/jec_pfn.yaml
+                      - --model-prefix=outputs/net
+                      - --log=logs/{auto}.log
+                      - --start-lr=${trialParameters.startLr}
+                      - --optimizer=${trialParameters.optimizer}
+                      - --num-epochs=${trialParameters.numEpochs}
+                      - --batch-size=${trialParameters.batchSize}
+                      - --data-fraction=${trialParameters.dataFraction}

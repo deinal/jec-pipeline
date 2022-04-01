@@ -1,11 +1,20 @@
-apiVersion: "serving.kubeflow.org/v1alpha2"
-kind: "InferenceService"
+apiVersion: serving.kubeflow.org/v1beta1
+kind: InferenceService
 metadata:
   name: MODEL_NAME
   namespace: NAMESPACE
 spec:
-  default:
-    predictor:
-      serviceAccountName: "sa"
-      onnx:
-        storageUri: STORAGE_URI
+  predictor:
+    serviceAccountName: sa
+    triton:
+      storageUri: STORAGE_URI
+      args: 
+        - --strict-model-config=false
+        - --log-verbose=1
+      resources:
+        limits:
+          cpu:     2
+          memory:  4Gi
+        requests:
+          cpu:      1
+          memory:   10Mi

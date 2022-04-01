@@ -27,7 +27,7 @@ def create_inferenceservice(client, yaml_filepath, namespace):
 
     client.create_namespaced_custom_object(
         group='serving.kubeflow.org',
-        version='v1alpha2',
+        version='v1beta1',
         namespace=namespace,
         plural='inferenceservices',
         body=infs_spec

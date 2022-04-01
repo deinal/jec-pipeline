@@ -5,8 +5,9 @@ scipy
 matplotlib
 tqdm
 PyYAML
-uproot3
-awkward0
+uproot
+awkward
 lz4
 xxhash
 tables
+s3fs
