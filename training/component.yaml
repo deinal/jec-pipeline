@@ -4,23 +4,7 @@ metadata:
   labels:
     add-pod-env: 'true'
 inputs:
-  - name: parameters
-    type: String
   - name: timestamp
-    type: String
-  - name: data_train
-    type: String
-  - name: data_val
-    type: String
-  - name: data_test
-    type: String
-  - name: network_config
-    type: String
-  - name: data_config
-    type: String
-  - name: model_prefix
-    type: String
-  - name: log
     type: String
 outputs:
   - name: output_path
@@ -33,24 +17,8 @@ implementation:
     command:
       - python3
       - launch_weaver.py
-      - --parameters
-      - inputValue: parameters
       - --timestamp
       - inputValue: timestamp
-      - --data-train
-      - inputValue: data_train
-      - --data-val
-      - inputValue: data_val
-      - --data-test
-      - inputValue: data_test
-      - --network-config
-      - inputValue: network_config
-      - --data-config
-      - inputValue: data_config
-      - --model-prefix
-      - inputValue: model_prefix
-      - --log
-      - inputValue: log
       - --output-path
       - outputPath: output_path
     env:

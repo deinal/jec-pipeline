@@ -5,7 +5,7 @@ import yaml
 import json
 from datetime import datetime
 
-timestamp = datetime.now().strftime("%d%m%Y-%H%M%S")
+timestamp = datetime.now().strftime('%d%m%Y-%H%M%S')
 pipeline_name = f'jec-pipeline-{timestamp}'
 description = 'Jet Energy Corrections Pipeline'
 package_path = f'{pipeline_name}.tar.gz'
@@ -20,41 +20,14 @@ def load_cookies(cookie_file, domain):
             break
     return cookies
 
-def read_config_file(config_file):
-    with open(config_file) as f:
-        config = yaml.safe_load(f)
-
-    config['parameters'] = json.dumps(config['parameters'])
-    config['data']['train'] = ' '.join(config['data']['train'])
-    config['data']['val'] = ' '.join(config['data']['val'])
-    config['data']['test'] = ' '.join(config['data']['test'])
-    
-    return config
-
 @dsl.pipeline(name=pipeline_name, description=description)
 def pipeline(
-    parameters: str,
     timestamp: str,
-    data_train: str,
-    data_val: str,
-    data_test: str,
-    network_config: str,
-    data_config: str,
-    model_prefix: str,
-    log: str,
     model_name: str,
 ):
 
     train = train_op(
-        parameters=parameters,
         timestamp=timestamp,
-        data_train=data_train,
-        data_val=data_val,
-        data_test=data_test,
-        network_config=network_config,
-        data_config=data_config,
-        model_prefix=model_prefix,
-        log=log,
     )
 
     serve = serve_op(
@@ -66,33 +39,23 @@ if __name__ == '__main__':
     train_op = kfp.components.load_component_from_file('training/component.yaml')
     serve_op = kfp.components.load_component_from_file('serving/component.yaml')
 
-    cookies = load_cookies(cookie_file='cookies.txt', domain='ml.cern.ch')
+    cookies = load_cookies(cookie_file='cookies.txt', domain='ml-staging.cern.ch')
     
-    client = kfp.Client(host='https://ml.cern.ch/pipeline', cookies=cookies)
+    client = kfp.Client(host='https://ml-staging.cern.ch/pipeline', cookies=cookies)
 
     kfp.compiler.Compiler().compile(pipeline_func=pipeline, package_path=package_path)
 
     client.upload_pipeline(pipeline_package_path=package_path, pipeline_name=pipeline_name, description=description)
 
-    experiment = client.create_experiment(name='jec-experiment', namespace='daniel-holmberg')
-
-    config = read_config_file(config_file='config.yaml')
+    experiment = client.create_experiment(name='jec-experiment', namespace='dholmber')
 
     run = client.run_pipeline(
         pipeline_package_path=package_path,
         experiment_id=experiment.id,
-        job_name=config['job_name'],
+        job_name='jec-trial',
         params={
             'timestamp': timestamp,
-            'parameters': config['parameters'],
-            'data_train': config['data']['train'],
-            'data_val': config['data']['val'],
-            'data_test': config['data']['test'],
-            'network_config': config['network_config'],
-            'data_config': config['data_config'],
-            'model_prefix': config['model_prefix'],
-            'log': config['log'],
-            'model_name': config['model_name']
+            'model_name': f'pfn-{timestamp}'
         }
     )
 

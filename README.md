@@ -7,13 +7,28 @@ Kubeflow is locked behind CERN single sign on. A [CLI tool](https://gitlab.cern.
 auth-get-sso-cookie -u https://ml.cern.ch -o cookies.txt
 ```
 
+```
+auth-get-sso-cookie -u https://ml-staging.cern.ch -o cookies.txt
+```
+
 Changes are put into containers stored on CERN's [own registry](https://registry.cern.ch/harbor/projects/34/repositories). Use the credentials from the user profile on harbor to log in to the registry.
 ```
 docker login registry.cern.ch
+```
+
+```
 docker build training -t registry.cern.ch/ml/jec-training
 docker push registry.cern.ch/ml/jec-training
+```
+
+```
 docker build serving -t registry.cern.ch/ml/jec-serving
 docker push registry.cern.ch/ml/jec-serving
+```
+
+```
+docker build training/weaver -t registry.cern.ch/ml/weaver
+docker push registry.cern.ch/ml/weaver
 ```
 
 ## Data
