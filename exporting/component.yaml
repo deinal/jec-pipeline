@@ -1,0 +1,28 @@
+name: Export PyTorch model
+description: |
+  A Kubeflow Pipeline component to export a pt model to onnx
+metadata:
+  labels:
+    add-pod-env: "true"
+inputs:
+  - name: timestamp
+    type: String
+  - name: input_path
+    type: String
+outputs:
+  - name: model_path
+    type: String
+implementation:
+  container:
+    image: registry.cern.ch/ml/jec-exporting:latest
+    command:
+      - python3
+      - export_model.py
+      - --timestamp
+      - inputValue: timestamp
+      - --input-path
+      - inputValue: input_path
+      - --model-path
+      - outputPath: model_path
+    env:
+      KFP_POD_NAME: "{{pod.name}}"

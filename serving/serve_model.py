@@ -1,7 +1,6 @@
 import argparse
 import kfp
 import kubernetes
-from kubernetes import config
 import yaml
 
 
@@ -35,8 +34,8 @@ def create_inferenceservice(client, yaml_filepath, namespace):
 
 
 parser = argparse.ArgumentParser(description='Serving Params')
-parser.add_argument('--model_name', type=str)
-parser.add_argument('--model_path', type=str)
+parser.add_argument('--model-name', type=str)
+parser.add_argument('--model-path', type=str)
 args = parser.parse_args()
 namespace = kfp.Client().get_user_namespace()
 
@@ -55,7 +54,7 @@ edit_template(
 )
 
 print('Load incluster config')
-config.load_incluster_config()
+kubernetes.config.load_incluster_config()
 
 print('Obtain client')
 k8s_co_client = kubernetes.client.CustomObjectsApi()
