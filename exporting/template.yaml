@@ -1,0 +1,63 @@
+apiVersion: kubeflow.org/v1
+kind: PyTorchJob
+metadata:
+  name: JOB_NAME
+  namespace: NAMESPACE
+spec:
+  pytorchReplicaSpecs:
+    Master:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          volumes:
+            - name: eos
+              hostPath:
+                path: /var/eos
+            - name: krb-secret-vol
+              secret:
+                secretName: krb-secret
+            - name: nvidia-driver
+              hostPath:
+                path: /opt/nvidia-driver
+                type: ""
+          containers:
+            - name: pytorch
+              resources: 
+                limits:
+                  cpu: 2
+                  memory: 2Gi
+                requests:
+                  cpu: 1
+                  memory: 1Gi
+              volumeMounts:
+                - name: eos
+                  mountPath: /eos
+                - name: krb-secret-vol
+                  mountPath: /secret/krb-secret-vol
+                - name: nvidia-driver
+                  mountPath: /opt/nvidia-driver
+              env:
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      key: AWS_ACCESS_KEY_ID
+                      name: s3-secret
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: AWS_SECRET_ACCESS_KEY
+                      name: s3-secret
+              image: registry.cern.ch/ml/weaver:latest
+              command:
+                - python
+                - train.py
+              args:
+                - --s3-endpoint=https://s3.cern.ch
+                - --data-config=data/jec_pfn.yaml
+                - --network-config=networks/pfn_regressor.py
+                - --model-prefix=PT_PATH
+                - --export-onnx=ONNX_PATH

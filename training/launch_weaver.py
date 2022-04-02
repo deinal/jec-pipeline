@@ -1,14 +1,9 @@
 import argparse
 import kubernetes
-from kubernetes import client
 import pathlib2
 import yaml
-import json
 import kfp
 import time
-import uuid
-import os
-import re
 
 
 print('Parse arguments')
@@ -62,11 +57,18 @@ while True:
     if 'completionTime' in status.keys():
         if status['completionTime']:
             print('Optimal trial')
-            print(status['currentOptimalTrial'])
+            optimal_trial = status['currentOptimalTrial']
+            print(optimal_trial)
             break
 
+model_path = 's3://jec-data/pfn/'
+values = [pa['value'] for pa in optimal_trial['parameterAssignments']]
+model_path += '_'.join(values)
+model_path += '.pt'
+print('model path:', model_path)
+
 pathlib2.Path(args.output_path).parent.mkdir(parents=True)
-pathlib2.Path(args.output_path).write_text('s3://jec-data/triton-beta')
+pathlib2.Path(args.output_path).write_text(model_path)
 
 k8s_co_client.delete_namespaced_custom_object(
     group='kubeflow.org',
@@ -74,7 +76,7 @@ k8s_co_client.delete_namespaced_custom_object(
     namespace=namespace,
     plural='experiments',
     name=name,
-    body=client.V1DeleteOptions()
+    body=kubernetes.client.V1DeleteOptions()
 )
 
 print(f'Experiment {name} deleted')

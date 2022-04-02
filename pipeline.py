@@ -30,13 +30,19 @@ def pipeline(
         timestamp=timestamp,
     )
 
+    export = export_op(
+        timestamp=timestamp,
+        input_path=train.outputs['output_path'],
+    )
+
     serve = serve_op(
-        model_path=train.outputs['output_path'],
+        model_path=export.outputs['model_path'],
         model_name=model_name,
     )
 
 if __name__ == '__main__':
     train_op = kfp.components.load_component_from_file('training/component.yaml')
+    export_op = kfp.components.load_component_from_file('exporting/component.yaml')
     serve_op = kfp.components.load_component_from_file('serving/component.yaml')
 
     cookies = load_cookies(cookie_file='cookies.txt', domain='ml-staging.cern.ch')

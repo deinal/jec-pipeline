@@ -5,7 +5,7 @@ metadata:
   namespace:
 spec:
   parallelTrialCount: 2
-  maxTrialCount: 4
+  maxTrialCount: 2
   maxFailedTrialCount: 1
   objective:
     type: minimize
@@ -136,3 +136,4 @@ spec:
                       - --num-epochs=${trialParameters.numEpochs}
                       - --batch-size=${trialParameters.batchSize}
                       - --data-fraction=${trialParameters.dataFraction}
+                      - --s3-model=jec-data/pfn/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt

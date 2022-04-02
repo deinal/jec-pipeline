@@ -22,6 +22,11 @@ docker push registry.cern.ch/ml/jec-training
 ```
 
 ```
+docker build exporting -t registry.cern.ch/ml/jec-exporting
+docker push registry.cern.ch/ml/jec-exporting
+```
+
+```
 docker build serving -t registry.cern.ch/ml/jec-serving
 docker push registry.cern.ch/ml/jec-serving
 ```

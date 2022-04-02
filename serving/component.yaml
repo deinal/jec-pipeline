@@ -15,9 +15,9 @@ implementation:
     command:
       - python3
       - serve_model.py
-      - --model_name
+      - --model-name
       - inputValue: model_name
-      - --model_path
+      - --model-path
       - inputValue: model_path
     env:
       KFP_POD_NAME: "{{pod.name}}"
