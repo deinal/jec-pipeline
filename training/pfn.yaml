@@ -38,7 +38,7 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "1"
+          - "5"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
@@ -105,6 +105,8 @@ spec:
                       - name: nvidia-driver
                         mountPath: /opt/nvidia-driver
                     env:
+                      - name: S3_ENDPOINT
+                        value: https://s3.cern.ch
                       - name: AWS_ACCESS_KEY_ID
                         valueFrom:
                           secretKeyRef:
@@ -124,9 +126,9 @@ spec:
                       - --num-workers=1
                       - --regression-mode
                       - --s3-endpoint=https://s3.cern.ch
-                      - --data-train=jec-data/001.root
-                      - --data-val=jec-data/002.root
-                      - --data-test=jec-data/003.root
+                      - --data-train=s3://jec-data/001.root
+                      - --data-val=s3://jec-data/002.root
+                      - --data-test=s3://jec-data/003.root
                       - --network-config=networks/pfn_regressor.py
                       - --data-config=data/jec_pfn.yaml
                       - --model-prefix=outputs/net
@@ -136,4 +138,5 @@ spec:
                       - --num-epochs=${trialParameters.numEpochs}
                       - --batch-size=${trialParameters.batchSize}
                       - --data-fraction=${trialParameters.dataFraction}
-                      - --s3-model=jec-data/pfn/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
+                      - --tensorboard-log-dir=s3://jec-data/tensorboard/pfn/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
+                      - --s3-model=s3://jec-data/pfn/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
