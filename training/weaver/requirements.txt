@@ -11,3 +11,5 @@ lz4
 xxhash
 tables
 s3fs
+tensorboardX
+boto3
