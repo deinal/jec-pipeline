@@ -2,6 +2,7 @@ import argparse
 import pathlib2
 import kubernetes
 import yaml
+import json
 import kfp
 
 
@@ -17,11 +18,11 @@ def edit_template(src, dst, job_name, namespace, pt_path, onnx_path):
     with open(dst, 'w') as f:
         f.write(template)
 
-def create_export_job(client, yaml_filepath, namespace):
+def create_pytorch_job(client, yaml_filepath, namespace):
     print('Load template for submission')
     with open(yaml_filepath, 'r') as f:
         export_spec = yaml.load(f, Loader=yaml.FullLoader)
-        print(export_spec)
+        print(json.dumps(export_spec, indent=2))
 
     client.create_namespaced_custom_object(
         group='kubeflow.org',
@@ -31,26 +32,38 @@ def create_export_job(client, yaml_filepath, namespace):
         body=export_spec,
     )
 
+def delete_pytorch_job(name, namespace):
+    print('Delete PyTorch job:', name)
+    k8s_co_client.delete_namespaced_custom_object(
+        group='kubeflow.org',
+        version='v1',
+        namespace=namespace,
+        plural='pytorchjobs',
+        name=name,
+        body=kubernetes.client.V1DeleteOptions()
+    )
+
 parser = argparse.ArgumentParser(description='Export Params')
-parser.add_argument('--timestamp', type=str)
-parser.add_argument('--input-path', type=str)
+parser.add_argument('--id', type=str)
+parser.add_argument('--s3-bucket', type=str)
+parser.add_argument('--pt-path', type=str)
+parser.add_argument('--delete-job', type=bool)
 parser.add_argument('--model-path', type=str)
 args = parser.parse_args()
-print('args:')
-print(vars(args))
+print('Args:', vars(args))
 
-name = f'export-job-{args.timestamp}'
+name = f'export-job-{args.id}'
 namespace = kfp.Client().get_user_namespace()
 
-model_path = f's3://jec-data/{args.timestamp}'
-onnx_path = f'{model_path}/pfn/1/model.onnx'
+model_path = f'{args.s3_bucket}/{args.id}'
+onnx_path = f'{model_path}/model/1/model.onnx'
 
 edit_template(
     src='template.yaml',
     dst='export_job.yaml',
     job_name=name,
     namespace=namespace,
-    pt_path=args.input_path,
+    pt_path=args.pt_path,
     onnx_path=onnx_path
 )
 
@@ -61,7 +74,10 @@ print('Obtain client')
 k8s_co_client = kubernetes.client.CustomObjectsApi()
 
 print('Create export job')
-create_export_job(k8s_co_client, 'export_job.yaml', namespace)
+create_pytorch_job(k8s_co_client, 'export_job.yaml', namespace)
 
 pathlib2.Path(args.model_path).parent.mkdir(parents=True)
 pathlib2.Path(args.model_path).write_text(model_path)
+
+if args.delete_job:
+    delete_pytorch_job(name, namespace)

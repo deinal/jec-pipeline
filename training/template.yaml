@@ -1,8 +1,8 @@
 apiVersion: kubeflow.org/v1beta1
 kind: Experiment
 metadata:
-  name:
-  namespace:
+  name: EXPERIMENT_NAME
+  namespace: NAMESPACE
 spec:
   parallelTrialCount: 2
   maxTrialCount: 2
@@ -95,8 +95,11 @@ spec:
                   - name: pytorch
                     resources: 
                       limits:
-                        cpu: 1
-                        memory:  1Gi
+                        cpu:     2
+                        memory:  12Gi
+                      requests:
+                        cpu:      1
+                        memory:   8Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -125,18 +128,15 @@ spec:
                       - --gpus=
                       - --num-workers=1
                       - --regression-mode
-                      - --s3-endpoint=https://s3.cern.ch
-                      - --data-train=s3://jec-data/001.root
-                      - --data-val=s3://jec-data/002.root
-                      - --data-test=s3://jec-data/003.root
-                      - --network-config=networks/pfn_regressor.py
-                      - --data-config=data/jec_pfn.yaml
-                      - --model-prefix=outputs/net
-                      - --log=logs/{auto}.log
+                      - --data-train=DATA_TRAIN
+                      - --data-val=DATA_VAL
+                      - --data-test=DATA_TEST
+                      - --data-config=DATA_CONFIG
+                      - --network-config=NETWORK_CONFIG
                       - --start-lr=${trialParameters.startLr}
                       - --optimizer=${trialParameters.optimizer}
                       - --num-epochs=${trialParameters.numEpochs}
                       - --batch-size=${trialParameters.batchSize}
                       - --data-fraction=${trialParameters.dataFraction}
-                      - --tensorboard-log-dir=s3://jec-data/tensorboard/pfn/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
-                      - --s3-model=s3://jec-data/pfn/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
+                      - --tensorboard-log-dir=S3_BUCKET/tensorboard/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
+                      - --s3-model=S3_BUCKET/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
