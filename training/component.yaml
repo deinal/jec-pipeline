@@ -1,13 +1,27 @@
-name: Run weaver
-description: A Kubeflow pipeline component for running weaver
+name: Run AutoML experiment
+description: A Kubeflow pipeline component for weaver hp tuning
 metadata:
   labels:
     add-pod-env: 'true'
 inputs:
-  - name: timestamp
+  - name: id
     type: String
+  - name: s3_bucket
+    type: String
+  - name: data_train
+    type: String
+  - name: data_val
+    type: String
+  - name: data_test
+    type: String
+  - name: data_config
+    type: String
+  - name: network_config
+    type: String
+  - name: delete_experiment
+    type: Boolean
 outputs:
-  - name: output_path
+  - name: best_model_path
     type: String
   - name: MLPipeline UI metadata
     type: UI metadata
@@ -17,10 +31,24 @@ implementation:
     command:
       - python3
       - launch_weaver.py
-      - --timestamp
-      - inputValue: timestamp
-      - --output-path
-      - outputPath: output_path
+      - --id
+      - inputValue: id
+      - --s3-bucket
+      - inputValue: s3_bucket
+      - --data-train
+      - inputValue: data_train
+      - --data-val
+      - inputValue: data_val
+      - --data-test
+      - inputValue: data_test
+      - --data-config
+      - inputValue: data_config
+      - --network-config
+      - inputValue: network_config
+      - --delete-experiment
+      - inputValue: delete_experiment
+      - --best-model-path
+      - outputPath: best_model_path
     env:
       KFP_POD_NAME: '{{pod.name}}'
     fileOutputs:

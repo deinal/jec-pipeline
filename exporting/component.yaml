@@ -5,10 +5,14 @@ metadata:
   labels:
     add-pod-env: "true"
 inputs:
-  - name: timestamp
+  - name: id
     type: String
-  - name: input_path
+  - name: s3_bucket
     type: String
+  - name: pt_path
+    type: String
+  - name: delete_job
+    type: Boolean
 outputs:
   - name: model_path
     type: String
@@ -18,10 +22,14 @@ implementation:
     command:
       - python3
       - export_model.py
-      - --timestamp
-      - inputValue: timestamp
-      - --input-path
-      - inputValue: input_path
+      - --id
+      - inputValue: id
+      - --s3-bucket
+      - inputValue: s3_bucket
+      - --pt-path
+      - inputValue: pt_path
+      - --delete-job
+      - inputValue: delete_job
       - --model-path
       - outputPath: model_path
     env:

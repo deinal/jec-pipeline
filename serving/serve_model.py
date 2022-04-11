@@ -2,6 +2,7 @@ import argparse
 import kfp
 import kubernetes
 import yaml
+import json
 
 
 def edit_template(src, dst, args, namespace):
@@ -16,20 +17,17 @@ def edit_template(src, dst, args, namespace):
         f.write(template)
 
 def create_inferenceservice(client, yaml_filepath, namespace):
-    print('yaml_filepath')
-    print(yaml_filepath)
-
     print('Load template for submission')
     with open(yaml_filepath, 'r') as f:
-        infs_spec = yaml.load(f, Loader=yaml.FullLoader)
-        print(infs_spec)
+        inference_spec = yaml.load(f, Loader=yaml.FullLoader)
+        print(json.dumps(inference_spec, indent=2))
 
     client.create_namespaced_custom_object(
         group='serving.kubeflow.org',
         version='v1beta1',
         namespace=namespace,
         plural='inferenceservices',
-        body=infs_spec
+        body=inference_spec
     )
 
 
@@ -37,13 +35,9 @@ parser = argparse.ArgumentParser(description='Serving Params')
 parser.add_argument('--model-name', type=str)
 parser.add_argument('--model-path', type=str)
 args = parser.parse_args()
+print('Args:', vars(args))
+
 namespace = kfp.Client().get_user_namespace()
-
-print('args:')
-print(vars(args))
-
-print('namespace:')
-print(namespace)
 
 print('Edit template')
 edit_template(
