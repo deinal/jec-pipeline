@@ -45,7 +45,7 @@ def get_pipeline(name, description):
             id=run_id,
             s3_bucket=s3_bucket,
             delete_job=delete_export_job,
-            pt_path=train.outputs['best_model_path'],
+            pt_path=train.outputs['optimal_model_path'],
         )
 
         serve = serve_op(
@@ -73,9 +73,9 @@ if __name__ == '__main__':
                         help='validation data')
     parser.add_argument('--data-test', type=str, default='s3://jec-data/test/*.root',
                         help='test data')
-    parser.add_argument('--delete-train-experiment', type=bool, default=True,
+    parser.add_argument('--delete-train-experiment', action='store_true', default=False,
                         help='whether or not to delete the hp tuning experiment once finished')
-    parser.add_argument('--delete-export-job', type=bool, default=True,
+    parser.add_argument('--delete-export-job', action='store_true', default=False,
                         help='whether or not to delete the export job once finished')
     args = parser.parse_args()
 

@@ -87,7 +87,7 @@ Now the runs are accessible to the deployed Tensorboard
 Install [kfp](https://www.kubeflow.org/docs/components/pipelines/sdk/install-sdk), e.g. on lxplus8: `pip3 install kfp`
 
 ```
-python3 pipeline.py --experiment pfn
+python3 pipeline.py
 ```
 
 ```
@@ -109,8 +109,8 @@ optional arguments:
                         validation data
   --data-test DATA_TEST
                         test data
-  --delete-train-experiment DELETE_TRAIN_EXPERIMENT
+  --delete-train-experiment
                         whether or not to delete the hp tuning experiment once finished
-  --delete-export-job DELETE_EXPORT_JOB
+  --delete-export-job
                         whether or not to delete the export job once finished
 ```

@@ -19,7 +19,7 @@ RUN export PATH=/home/$NAME/.local/bin:$PATH && \
 
 RUN git clone https://github.com/deinal/weaver.git && \
     cd weaver && \
-    git checkout dev/jet-energy-corrections
+    git checkout bc4cb4
 
 WORKDIR /home/$NAME/weaver
 

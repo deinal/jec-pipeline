@@ -70,7 +70,7 @@ def write_results_to_ui(results):
         {
             'type': 'markdown',
             'storage': 'inline',
-            'source': '# Best trial 🏆',
+            'source': '# Optimal trial 🏆',
         }, {
             'type': 'table',
             'storage': 'inline',
@@ -90,7 +90,7 @@ def write_results_to_ui(results):
         json.dump(metadata, f)
 
 def get_model_path(results, s3_bucket, run_id):
-    model_path = f'{s3_bucket}/{run_id}'
+    model_path = f'{s3_bucket}/{run_id}/'
     values = [pa['value'] for pa in results['parameterAssignments']]
     model_path += '_'.join(values)
     model_path += '.pt'
@@ -106,8 +106,8 @@ parser.add_argument('--data-val', type=str)
 parser.add_argument('--data-test', type=str)
 parser.add_argument('--data-config', type=str)
 parser.add_argument('--network-config', type=str)
-parser.add_argument('--delete-experiment', type=bool)
-parser.add_argument('--best-model-path', type=str)
+parser.add_argument('--delete-experiment', type=str)
+parser.add_argument('--optimal-model-path', type=str)
 args = parser.parse_args()
 print('Args:', vars(args))
 
@@ -160,9 +160,9 @@ while True:
 
 write_results_to_ui(optimal_trial)
 
-best_model_path = get_model_path(optimal_trial, args.s3_bucket, args.id)
-pathlib2.Path(args.best_model_path).parent.mkdir(parents=True)
-pathlib2.Path(args.best_model_path).write_text(best_model_path)
+optimal_model_path = get_model_path(optimal_trial, args.s3_bucket, args.id)
+pathlib2.Path(args.optimal_model_path).parent.mkdir(parents=True)
+pathlib2.Path(args.optimal_model_path).write_text(optimal_model_path)
 
-if args.delete_experiment:
+if args.delete_experiment == 'True':
     delete_experiment(name, namespace)

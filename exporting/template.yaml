@@ -56,7 +56,6 @@ spec:
                 - python
                 - train.py
               args:
-                - --s3-endpoint=https://s3.cern.ch
                 - --data-config=data/jec_pfn.yaml
                 - --network-config=networks/pfn_regressor.py
                 - --model-prefix=PT_PATH
