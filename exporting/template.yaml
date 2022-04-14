@@ -60,3 +60,4 @@ spec:
                 - --network-config=networks/pfn_regressor.py
                 - --model-prefix=PT_PATH
                 - --export-onnx=ONNX_PATH
+                - --triton-config=TRITON_CONFIG

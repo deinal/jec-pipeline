@@ -7,7 +7,7 @@ import json
 import kfp
 
 
-def edit_template(src, dst, job_name, namespace, pt_path, onnx_path):
+def edit_template(src, dst, job_name, namespace, pt_path, onnx_path, triton_config):
     with open(src, 'r') as f:
         template = f.read()
 
@@ -15,6 +15,7 @@ def edit_template(src, dst, job_name, namespace, pt_path, onnx_path):
     template = template.replace('NAMESPACE', namespace)
     template = template.replace('PT_PATH', pt_path)
     template = template.replace('ONNX_PATH', onnx_path)
+    template = template.replace('TRITON_CONFIG', triton_config)
 
     with open(dst, 'w') as f:
         f.write(template)
@@ -57,6 +58,7 @@ name = f'export-job-{args.id}'
 namespace = kfp.Client().get_user_namespace()
 
 model_path = f'{args.s3_bucket}/{args.id}'
+triton_config = f'{model_path}/optimal/config.pbtxt'
 onnx_path = f'{model_path}/optimal/1/model.onnx'
 
 edit_template(
@@ -65,7 +67,8 @@ edit_template(
     job_name=name,
     namespace=namespace,
     pt_path=args.pt_path,
-    onnx_path=onnx_path
+    onnx_path=onnx_path,
+    triton_config=triton_config
 )
 
 print('Load incluster config')
