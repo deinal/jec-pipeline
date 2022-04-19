@@ -44,6 +44,8 @@ def get_pipeline(name, description):
         export = export_op(
             id=run_id,
             s3_bucket=s3_bucket,
+            data_config=data_config,
+            network_config=network_config,
             delete_job=delete_export_job,
             pt_path=train.outputs['optimal_model_path'],
         )

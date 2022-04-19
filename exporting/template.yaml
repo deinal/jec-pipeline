@@ -29,10 +29,10 @@ spec:
               resources: 
                 limits:
                   cpu: 2
-                  memory: 2Gi
+                  memory: 12Gi
                 requests:
                   cpu: 1
-                  memory: 1Gi
+                  memory: 8Gi
               volumeMounts:
                 - name: eos
                   mountPath: /eos
@@ -56,8 +56,8 @@ spec:
                 - python
                 - train.py
               args:
-                - --data-config=data/jec_pfn.yaml
-                - --network-config=networks/pfn_regressor.py
+                - --data-config=DATA_CONFIG
+                - --network-config=NETWORK_CONFIG
                 - --model-prefix=PT_PATH
                 - --export-onnx=ONNX_PATH
                 - --triton-config=TRITON_CONFIG

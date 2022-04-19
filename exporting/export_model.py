@@ -7,7 +7,12 @@ import json
 import kfp
 
 
-def edit_template(src, dst, job_name, namespace, pt_path, onnx_path, triton_config):
+def edit_template(
+        src, dst, job_name, namespace, 
+        pt_path, onnx_path, triton_config, 
+        data_config, network_config
+    ):
+    
     with open(src, 'r') as f:
         template = f.read()
 
@@ -16,6 +21,8 @@ def edit_template(src, dst, job_name, namespace, pt_path, onnx_path, triton_conf
     template = template.replace('PT_PATH', pt_path)
     template = template.replace('ONNX_PATH', onnx_path)
     template = template.replace('TRITON_CONFIG', triton_config)
+    template = template.replace('DATA_CONFIG', data_config)
+    template = template.replace('NETWORK_CONFIG', network_config)
 
     with open(dst, 'w') as f:
         f.write(template)
@@ -49,6 +56,8 @@ parser = argparse.ArgumentParser(description='Export Params')
 parser.add_argument('--id', type=str)
 parser.add_argument('--s3-bucket', type=str)
 parser.add_argument('--pt-path', type=str)
+parser.add_argument('--data-config', type=str)
+parser.add_argument('--network-config', type=str)
 parser.add_argument('--delete-job', type=str)
 parser.add_argument('--model-path', type=str)
 args = parser.parse_args()
@@ -68,7 +77,9 @@ edit_template(
     namespace=namespace,
     pt_path=args.pt_path,
     onnx_path=onnx_path,
-    triton_config=triton_config
+    triton_config=triton_config,
+    data_config=args.data_config,
+    network_config=args.network_config,
 )
 
 print('Load incluster config')
