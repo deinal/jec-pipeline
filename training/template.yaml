@@ -77,6 +77,7 @@ spec:
             restartPolicy: OnFailure
             template:
               metadata:
+                namespace: NAMESPACE
                 annotations:
                   sidecar.istio.io/inject: "false"
               spec:
@@ -95,11 +96,13 @@ spec:
                   - name: pytorch
                     resources: 
                       limits:
-                        cpu:     2
-                        memory:  12Gi
+                        nvidia.com/gpu: NUM_GPUS
+                        cpu: 4
+                        memory: 12Gi
                       requests:
-                        cpu:      1
-                        memory:   8Gi
+                        nvidia.com/gpu: NUM_GPUS
+                        cpu: NUM_CPUS
+                        memory: 6Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -125,8 +128,81 @@ spec:
                       - python
                       - train.py
                     args:
-                      - --gpus=
-                      - --num-workers=1
+                      - --gpus=GPU_IDS
+                      - --num-workers=NUM_CPUS
+                      - --backend=BACKEND
+                      - --regression-mode
+                      - --data-train=DATA_TRAIN
+                      - --data-val=DATA_VAL
+                      - --data-test=DATA_TEST
+                      - --data-config=DATA_CONFIG
+                      - --network-config=NETWORK_CONFIG
+                      - --start-lr=${trialParameters.startLr}
+                      - --optimizer=${trialParameters.optimizer}
+                      - --num-epochs=${trialParameters.numEpochs}
+                      - --batch-size=${trialParameters.batchSize}
+                      - --data-fraction=${trialParameters.dataFraction}
+                      - --tensorboard-log-dir=S3_BUCKET/tensorboard/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
+                      - --s3-model=S3_BUCKET/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
+          Worker:
+            replicas: WORKER_REPLICAS
+            restartPolicy: OnFailure
+            template:
+              metadata:
+                namespace: NAMESPACE
+                annotations:
+                  sidecar.istio.io/inject: "false"
+              spec:
+                volumes:
+                  - name: eos
+                    hostPath:
+                      path: /var/eos
+                  - name: krb-secret-vol
+                    secret:
+                      secretName: krb-secret
+                  - name: nvidia-driver
+                    hostPath:
+                      path: /opt/nvidia-driver
+                      type: ""
+                containers:
+                  - name: pytorch
+                    resources:
+                      limits:
+                        nvidia.com/gpu: NUM_GPUS
+                        cpu: 4
+                        memory: 12Gi
+                      requests:
+                        nvidia.com/gpu: NUM_GPUS
+                        cpu: NUM_CPUS
+                        memory: 6Gi
+                    volumeMounts:
+                      - name: eos
+                        mountPath: /eos
+                      - name: krb-secret-vol
+                        mountPath: /secret/krb-secret-vol
+                      - name: nvidia-driver
+                        mountPath: /opt/nvidia-driver
+                    env:
+                      - name: S3_ENDPOINT
+                        value: https://s3.cern.ch
+                      - name: AWS_ACCESS_KEY_ID
+                        valueFrom:
+                          secretKeyRef:
+                            key: AWS_ACCESS_KEY_ID
+                            name: s3-secret
+                      - name: AWS_SECRET_ACCESS_KEY
+                        valueFrom:
+                          secretKeyRef:
+                            key: AWS_SECRET_ACCESS_KEY
+                            name: s3-secret
+                    image: registry.cern.ch/ml/weaver:latest
+                    command:
+                      - python
+                      - train.py
+                    args:
+                      - --gpus=GPU_IDS
+                      - --num-workers=NUM_CPUS
+                      - --backend=BACKEND
                       - --regression-mode
                       - --data-train=DATA_TRAIN
                       - --data-val=DATA_VAL

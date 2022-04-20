@@ -18,6 +18,12 @@ inputs:
     type: String
   - name: network_config
     type: String
+  - name: num_replicas
+    type: Integer
+  - name: num_gpus
+    type: Integer
+  - name: num_cpus
+    type: Integer
   - name: delete_experiment
     type: Boolean
 outputs:
@@ -45,6 +51,12 @@ implementation:
       - inputValue: data_config
       - --network-config
       - inputValue: network_config
+      - --num-replicas
+      - inputValue: num_replicas
+      - --num-gpus
+      - inputValue: num_gpus
+      - --num-cpus
+      - inputValue: num_cpus
       - --delete-experiment
       - inputValue: delete_experiment
       - --optimal-model-path

@@ -26,6 +26,9 @@ def get_pipeline(name, description):
         data_test: str,
         data_config: str,
         network_config: str,
+        num_replicas: int,
+        num_gpus: int,
+        num_cpus: int,
         delete_train_experiment: bool,
         delete_export_job: bool,
     ):
@@ -33,6 +36,9 @@ def get_pipeline(name, description):
         train = train_op(
             id=run_id,
             s3_bucket=s3_bucket,
+            num_replicas=num_replicas,
+            num_gpus=num_gpus,
+            num_cpus=num_cpus,
             data_train=data_train,
             data_val=data_val,
             data_test=data_test,
@@ -62,7 +68,13 @@ if __name__ == '__main__':
     parser.add_argument('--namespace', type=str, default='dholmber', 
                         help='Kubeflow namespace to run pipeline in')
     parser.add_argument('--experiment-name', type=str, default='jec-experiment', 
-                        help='name for KFP experiment on Kubeflow')                    
+                        help='name for KFP experiment on Kubeflow')
+    parser.add_argument('--num-replicas', type=int, default=1,
+                        help='number of nodes to train on')
+    parser.add_argument('--num-gpus', type=int, default=0,
+                        help='number of gpus per node, maximum in the cluster is 1')
+    parser.add_argument('--num-cpus', type=int, default=1, 
+                        help='number of cpus to use (for data loader)')                       
     parser.add_argument('--data-config', type=str, default='data/jec_pfn.yaml', 
                         help='data configuration yaml file')
     parser.add_argument('--network-config', type=str, default='networks/pfn_regressor.py', 
@@ -124,6 +136,9 @@ if __name__ == '__main__':
             'data_test': args.data_test,
             'data_config': args.data_config,
             'network_config': args.network_config,
+            'num_replicas': args.num_replicas,
+            'num_gpus': args.num_gpus,
+            'num_cpus': args.num_cpus,
             'delete_train_experiment': args.delete_train_experiment,
             'delete_export_job': args.delete_export_job,
         }
