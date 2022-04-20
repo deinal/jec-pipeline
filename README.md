@@ -32,7 +32,7 @@ docker push registry.cern.ch/ml/jec-serving
 ```
 
 ```
-docker build training/weaver -t registry.cern.ch/ml/weaver
+docker build weaver -t registry.cern.ch/ml/weaver
 docker push registry.cern.ch/ml/weaver
 ```
 
