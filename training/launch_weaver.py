@@ -167,6 +167,8 @@ k8s_co_client = kubernetes.client.CustomObjectsApi()
 print('Create katib experiment')
 create_experiment(k8s_co_client, 'katib_experiment.yaml', namespace)
 
+prev_status = {}
+
 while True:
     time.sleep(5)
     
@@ -179,7 +181,9 @@ while True:
     )
     
     status = resource['status']
-    print(status)
+    if status != prev_status:
+        print(json.dumps(status, indent=2))
+        prev_status = status
 
     if 'completionTime' in status.keys():
         if status['completionTime']:

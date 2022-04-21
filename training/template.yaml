@@ -5,7 +5,7 @@ metadata:
   namespace: NAMESPACE
 spec:
   parallelTrialCount: 1
-  maxTrialCount: 1
+  maxTrialCount: 5
   maxFailedTrialCount: 1
   objective:
     type: minimize
@@ -26,7 +26,7 @@ spec:
       parameterType: double
       feasibleSpace:
         min: "1.0e-5"
-        max: "1.0e-4"
+        max: "1.0e-2"
     - name: optimizer
       parameterType: categorical
       feasibleSpace:
@@ -43,12 +43,15 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
+          - "50"
           - "100"
+          - "500"
+          - "1000"
     - name: data-fraction
       parameterType: categorical
       feasibleSpace:
         list:
-          - "0.001"
+          - "0.1"
   trialTemplate:
     primaryContainerName: pytorch
     trialParameters:
@@ -77,7 +80,6 @@ spec:
             restartPolicy: OnFailure
             template:
               metadata:
-                namespace: NAMESPACE
                 annotations:
                   sidecar.istio.io/inject: "false"
               spec:
@@ -149,7 +151,6 @@ spec:
             restartPolicy: OnFailure
             template:
               metadata:
-                namespace: NAMESPACE
                 annotations:
                   sidecar.istio.io/inject: "false"
               spec:
