@@ -19,7 +19,7 @@ RUN export PATH=/home/$NAME/.local/bin:$PATH && \
 
 RUN git clone https://github.com/deinal/weaver.git && \
     cd weaver && \
-    git checkout af6bf2d
+    git checkout c6911e5
 
 WORKDIR /home/$NAME/weaver
 

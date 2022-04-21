@@ -81,11 +81,11 @@ if __name__ == '__main__':
                         help='network architecture configuration file')
     parser.add_argument('--s3-bucket', type=str, default='s3://jec-data', 
                         help='s3 bucket used by the pipeline for storing models and tensorboard log dirs')
-    parser.add_argument('--data-train', type=str, default='0:s3://jec-data/train/001.root,1:s3://jec-data/train/002.root',
+    parser.add_argument('--data-train', type=str, default='0:s3://jec-data/train/00*.root,1:s3://jec-data/train/01*.root',
                         help='training data')
-    parser.add_argument('--data-val', type=str, default='s3://jec-data/val/100.root',
+    parser.add_argument('--data-val', type=str, default='s3://jec-data/val/10*.root',
                         help='validation data')
-    parser.add_argument('--data-test', type=str, default='s3://jec-data/test/120.root',
+    parser.add_argument('--data-test', type=str, default='s3://jec-data/test/12*.root',
                         help='test data')
     parser.add_argument('--delete-train-experiment', action='store_true', default=False,
                         help='whether or not to delete the hp tuning experiment once finished')

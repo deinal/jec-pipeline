@@ -5,7 +5,7 @@ metadata:
   namespace: NAMESPACE
 spec:
   parallelTrialCount: 1
-  maxTrialCount: 5
+  maxTrialCount: 30
   maxFailedTrialCount: 1
   objective:
     type: minimize
@@ -26,7 +26,7 @@ spec:
       parameterType: double
       feasibleSpace:
         min: "1.0e-5"
-        max: "1.0e-2"
+        max: "1.0e-1"
     - name: optimizer
       parameterType: categorical
       feasibleSpace:
@@ -34,16 +34,20 @@ spec:
           - "adam"
           - "adamW"
           - "ranger"
+          - "rmsprop"
+          - "adagrad"
     - name: num-epochs
       parameterType: discrete
       feasibleSpace:
         list:
           - "5"
+          - "10"
+          - "20"
+          - "30"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
         list:
-          - "50"
           - "100"
           - "500"
           - "1000"
@@ -52,6 +56,8 @@ spec:
       feasibleSpace:
         list:
           - "0.1"
+          - "0.5"
+          - "1.0"
   trialTemplate:
     primaryContainerName: pytorch
     trialParameters:

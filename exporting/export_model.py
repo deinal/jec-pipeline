@@ -61,7 +61,7 @@ parser.add_argument('--network-config', type=str)
 parser.add_argument('--delete-job', type=str)
 parser.add_argument('--model-path', type=str)
 args = parser.parse_args()
-print('Args:', vars(args))
+print('Args:', json.dumps(vars(args), indent=2))
 
 name = f'export-job-{args.id}'
 namespace = kfp.Client().get_user_namespace()
@@ -91,6 +91,8 @@ k8s_co_client = kubernetes.client.CustomObjectsApi()
 print('Create export job')
 create_pytorch_job(k8s_co_client, 'export_job.yaml', namespace)
 
+prev_status = {}
+
 while True:
     time.sleep(5)
     
@@ -103,7 +105,9 @@ while True:
     )
     
     status = resource['status']
-    print(status)
+    if status != prev_status:
+        print(json.dumps(status, indent=2))
+        prev_status = status
 
     if 'succeeded' in status['replicaStatuses']['Master']:
         print('Export succeeded')
