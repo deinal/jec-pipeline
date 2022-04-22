@@ -5,6 +5,7 @@ import yaml
 import json
 import kfp
 import time
+import ast 
 
 
 def edit_template(
@@ -113,6 +114,21 @@ def get_model_path(results, s3_bucket, run_id):
     print('Model path:', model_path)
     return model_path
 
+def get_network_option(results):
+    pair_list = []
+    for pa in results['parameterAssignments']:
+        name = pa['name'].replace("-", "_")
+        value = pa['value']
+        try:
+            ast.literal_eval(pa['value'])
+        except ValueError:
+            value = f'\"{value}\"'
+        pair = f'{name}:{value}'
+        pair_list.append(pair)
+    network_option = ','.join(pair_list)
+    print('Network option:', network_option)
+    return network_option
+
 print('Parse arguments')
 parser = argparse.ArgumentParser(description='Train Params')
 parser.add_argument('--id', type=str)
@@ -123,10 +139,11 @@ parser.add_argument('--data-test', type=str)
 parser.add_argument('--data-config', type=str)
 parser.add_argument('--network-config', type=str)
 parser.add_argument('--delete-experiment', type=str)
-parser.add_argument('--optimal-model-path', type=str)
 parser.add_argument('--num-replicas', type=int)
 parser.add_argument('--num-cpus', type=int)
 parser.add_argument('--num-gpus', type=int)
+parser.add_argument('--optimal-model-path', type=str)
+parser.add_argument('--network-option', type=str)
 args = parser.parse_args()
 print('Args:', json.dumps(vars(args), indent=2))
 
@@ -197,6 +214,12 @@ write_results_to_ui(optimal_trial)
 optimal_model_path = get_model_path(optimal_trial, args.s3_bucket, args.id)
 pathlib2.Path(args.optimal_model_path).parent.mkdir(parents=True)
 pathlib2.Path(args.optimal_model_path).write_text(optimal_model_path)
+
+network_option = get_network_option(optimal_trial)
+pathlib2.Path(args.network_option).parent.mkdir(parents=True)
+pathlib2.Path(args.network_option).write_text(network_option)
+
+print('Done')
 
 if args.delete_experiment == 'True':
     delete_experiment(name, namespace)

@@ -10,7 +10,7 @@ import kfp
 def edit_template(
         src, dst, job_name, namespace, 
         pt_path, onnx_path, triton_config, 
-        data_config, network_config
+        data_config, network_config, network_option
     ):
     
     with open(src, 'r') as f:
@@ -23,6 +23,7 @@ def edit_template(
     template = template.replace('TRITON_CONFIG', triton_config)
     template = template.replace('DATA_CONFIG', data_config)
     template = template.replace('NETWORK_CONFIG', network_config)
+    template = template.replace('NETWORK_OPTION', network_option)
 
     with open(dst, 'w') as f:
         f.write(template)
@@ -56,6 +57,7 @@ parser = argparse.ArgumentParser(description='Export Params')
 parser.add_argument('--id', type=str)
 parser.add_argument('--s3-bucket', type=str)
 parser.add_argument('--pt-path', type=str)
+parser.add_argument('--network-option', type=str)
 parser.add_argument('--data-config', type=str)
 parser.add_argument('--network-config', type=str)
 parser.add_argument('--delete-job', type=str)
@@ -80,6 +82,7 @@ edit_template(
     triton_config=triton_config,
     data_config=args.data_config,
     network_config=args.network_config,
+    network_option=args.network_option,
 )
 
 print('Load incluster config')

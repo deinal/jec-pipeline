@@ -22,6 +22,55 @@ spec:
     collector:
       kind: StdOut
   parameters:
+    - name: num-edge-conv-blocks
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "1"
+    - name: k
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "1"
+    - name: num-conv-layers
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+    - name: conv-dim
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "50"
+          - "100"
+          - "200"
+          - "400"
+    - name: num-fc-layers
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+    - name: fc-dim
+      parameterType: discrete
+      feasibleSpace:
+        list:
+          - "50"
+          - "100"
+          - "200"
+          - "400"
+    - name: dropout
+      parameterType: double
+      feasibleSpace:
+        min: "0.0"
+        max: "0.5"
     - name: start-lr
       parameterType: double
       feasibleSpace:
@@ -40,27 +89,41 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "5"
-          - "10"
           - "20"
-          - "30"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
         list:
           - "100"
-          - "500"
-          - "1000"
     - name: data-fraction
       parameterType: categorical
       feasibleSpace:
         list:
           - "0.1"
-          - "0.5"
-          - "1.0"
   trialTemplate:
     primaryContainerName: pytorch
     trialParameters:
+      - name: numEdgeConvBlocks
+        reference: num-edge-conv-blocks
+        description: ""
+      - name: k
+        reference: k
+        description: ""
+      - name: numConvLayers
+        reference: num-conv-layers
+        description: ""
+      - name: convDim
+        reference: conv-dim
+        description: ""
+      - name: numFcLayers
+        reference: num-fc-layers
+        description: ""
+      - name: fcDim
+        reference: fc-dim
+        description: ""
+      - name: dropout
+        reference: dropout
+        description: ""
       - name: startLr
         reference: start-lr
         description: ""
@@ -106,7 +169,7 @@ spec:
                       limits:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: 4
-                        memory: 12Gi
+                        memory: 8Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
@@ -140,6 +203,7 @@ spec:
                       - --num-workers=NUM_CPUS
                       - --backend=BACKEND
                       - --regression-mode
+                      - --copy-inputs
                       - --data-train=DATA_TRAIN
                       - --data-val=DATA_VAL
                       - --data-test=DATA_TEST
@@ -150,8 +214,9 @@ spec:
                       - --num-epochs=${trialParameters.numEpochs}
                       - --batch-size=${trialParameters.batchSize}
                       - --data-fraction=${trialParameters.dataFraction}
-                      - --tensorboard-log-dir=S3_BUCKET/tensorboard/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
-                      - --s3-model=S3_BUCKET/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
+                      - --network-option=num_edge_conv_blocks:${trialParameters.numEdgeConvBlocks},k:${trialParameters.k},num_conv_layers:${trialParameters.numConvLayers},conv_dim:${trialParameters.convDim},num_fc_layers:${trialParameters.numFcLayers},fc_dim:${trialParameters.fcDim},dropout:${trialParameters.dropout}
+                      - --tensorboard-log-dir=S3_BUCKET/tensorboard/RUN_ID/${trialParameters.numEdgeConvBlocks}_${trialParameters.k}_${trialParameters.numConvLayers}_${trialParameters.convDim}_${trialParameters.numFcLayers}_${trialParameters.fcDim}_${trialParameters.dropout}_${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
+                      - --s3-model=S3_BUCKET/RUN_ID/${trialParameters.numEdgeConvBlocks}_${trialParameters.k}_${trialParameters.numConvLayers}_${trialParameters.convDim}_${trialParameters.numFcLayers}_${trialParameters.fcDim}_${trialParameters.dropout}_${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
           Worker:
             replicas: WORKER_REPLICAS
             restartPolicy: OnFailure
@@ -173,11 +238,11 @@ spec:
                       type: ""
                 containers:
                   - name: pytorch
-                    resources:
+                    resources: 
                       limits:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: 4
-                        memory: 12Gi
+                        memory: 8Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
@@ -211,6 +276,7 @@ spec:
                       - --num-workers=NUM_CPUS
                       - --backend=BACKEND
                       - --regression-mode
+                      - --copy-inputs
                       - --data-train=DATA_TRAIN
                       - --data-val=DATA_VAL
                       - --data-test=DATA_TEST
@@ -221,5 +287,6 @@ spec:
                       - --num-epochs=${trialParameters.numEpochs}
                       - --batch-size=${trialParameters.batchSize}
                       - --data-fraction=${trialParameters.dataFraction}
-                      - --tensorboard-log-dir=S3_BUCKET/tensorboard/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
-                      - --s3-model=S3_BUCKET/RUN_ID/${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt
+                      - --network-option=num_edge_conv_blocks:${trialParameters.numEdgeConvBlocks},k:${trialParameters.k},num_conv_layers:${trialParameters.numConvLayers},conv_dim:${trialParameters.convDim},num_fc_layers:${trialParameters.numFcLayers},fc_dim:${trialParameters.fcDim},dropout:${trialParameters.dropout}
+                      - --tensorboard-log-dir=S3_BUCKET/tensorboard/RUN_ID/${trialParameters.numEdgeConvBlocks}_${trialParameters.k}_${trialParameters.numConvLayers}_${trialParameters.convDim}_${trialParameters.numFcLayers}_${trialParameters.fcDim}_${trialParameters.dropout}_${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}
+                      - --s3-model=S3_BUCKET/RUN_ID/${trialParameters.numEdgeConvBlocks}_${trialParameters.k}_${trialParameters.numConvLayers}_${trialParameters.convDim}_${trialParameters.numFcLayers}_${trialParameters.fcDim}_${trialParameters.dropout}_${trialParameters.startLr}_${trialParameters.optimizer}_${trialParameters.numEpochs}_${trialParameters.batchSize}_${trialParameters.dataFraction}.pt

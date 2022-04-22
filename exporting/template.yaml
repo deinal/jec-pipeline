@@ -58,6 +58,7 @@ spec:
               args:
                 - --data-config=DATA_CONFIG
                 - --network-config=NETWORK_CONFIG
+                - --network-option=NETWORK_OPTION
                 - --model-prefix=PT_PATH
                 - --export-onnx=ONNX_PATH
                 - --triton-config=TRITON_CONFIG
