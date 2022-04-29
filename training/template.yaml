@@ -89,17 +89,17 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "5"
+          - "30"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
         list:
-          - "100"
+          - "1000"
     - name: data-fraction
       parameterType: categorical
       feasibleSpace:
         list:
-          - "0.001"
+          - "1"
   trialTemplate:
     primaryContainerName: pytorch
     trialParameters:
