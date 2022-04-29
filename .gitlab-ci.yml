@@ -9,7 +9,7 @@ build:weaver:
   script: ignore
   variables:
     TO: $CI_REGISTRY_IMAGE/weaver:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}
-    CONTEXT_DIR: "./training/weaver"
+    CONTEXT_DIR: "./weaver"
     DOCKER_FILE: "Dockerfile"
     NO_CACHE: "0"
 
@@ -20,7 +20,7 @@ release:weaver:
   script: ignore
   variables:
     TO: $CI_REGISTRY_IMAGE/weaver:${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHORT_SHA}
-    CONTEXT_DIR: "./training/weaver"
+    CONTEXT_DIR: "./weaver"
     DOCKER_FILE: "Dockerfile"
     NO_CACHE: "0"
   only:

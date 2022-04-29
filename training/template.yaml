@@ -4,7 +4,7 @@ metadata:
   name: EXPERIMENT_NAME
   namespace: NAMESPACE
 spec:
-  parallelTrialCount: 1
+  parallelTrialCount: 2
   maxTrialCount: 30
   maxFailedTrialCount: 1
   objective:
@@ -89,7 +89,7 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "20"
+          - "5"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
@@ -99,7 +99,7 @@ spec:
       parameterType: categorical
       feasibleSpace:
         list:
-          - "0.1"
+          - "0.001"
   trialTemplate:
     primaryContainerName: pytorch
     trialParameters:
@@ -169,11 +169,11 @@ spec:
                       limits:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: 4
-                        memory: 8Gi
+                        memory: 12Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 6Gi
+                        memory: 8Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -242,11 +242,11 @@ spec:
                       limits:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: 4
-                        memory: 8Gi
+                        memory: 12Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 6Gi
+                        memory: 8Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos

@@ -107,14 +107,17 @@ while True:
         name=name
     )
     
-    status = resource['status']
-    if status != prev_status:
-        print(json.dumps(status, indent=2))
-        prev_status = status
+    if 'status' in resource.keys():
+        status = resource['status']
+        if status != prev_status:
+            print(json.dumps(status, indent=2))
+            prev_status = status
 
-    if 'succeeded' in status['replicaStatuses']['Master']:
-        print('Export succeeded')
-        break
+        if 'succeeded' in status['replicaStatuses']['Master']:
+            print('Export succeeded')
+            break
+    else:
+        print(resource)
 
 pathlib2.Path(args.model_path).parent.mkdir(parents=True)
 pathlib2.Path(args.model_path).write_text(model_path)
