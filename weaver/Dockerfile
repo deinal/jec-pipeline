@@ -7,20 +7,21 @@ RUN apt-get -qq update && \
     DEBIAN_FRONTEND=noninteractive apt-get -yqq install libpam-krb5 krb5-user && \
     apt-get -yqq clean
 
-RUN useradd -m $NAME
-USER $NAME
-WORKDIR /home/$NAME
+#RUN useradd -m $NAME
+#USER $NAME
+#WORKDIR /home/$NAME
+WORKDIR /ml
 
 COPY krb5.conf /etc/krb5.conf
 
 COPY requirements.txt .
-RUN export PATH=/home/$NAME/.local/bin:$PATH && \
+RUN export PATH=/ml/.local/bin:$PATH && \
     pip install -Ur requirements.txt --no-cache-dir
 
 RUN git clone https://github.com/deinal/weaver.git && \
     cd weaver && \
-    git checkout 5acf787
+    git checkout 5c71cc5
 
-WORKDIR /home/$NAME/weaver
+WORKDIR /ml/weaver
 
 ENTRYPOINT ["python", "train.py"]

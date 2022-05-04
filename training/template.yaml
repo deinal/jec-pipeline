@@ -5,7 +5,7 @@ metadata:
   namespace: NAMESPACE
 spec:
   parallelTrialCount: 2
-  maxTrialCount: 30
+  maxTrialCount: 6
   maxFailedTrialCount: 1
   objective:
     type: minimize
@@ -19,8 +19,15 @@ spec:
   algorithm:
     algorithmName: random
   metricsCollectorSpec:
+    source:
+      fileSystemPath:
+        path: "/var/log/katib/metrics.log"
+        kind: File
     collector:
-      kind: StdOut
+      kind: File
+  # metricsCollectorSpec:
+  #   collector:
+  #     kind: StdOut
   parameters:
     - name: num-edge-conv-blocks
       parameterType: discrete
@@ -89,7 +96,7 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "30"
+          - "60"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
@@ -173,7 +180,7 @@ spec:
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 8Gi
+                        memory: 6Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -204,6 +211,7 @@ spec:
                       - --backend=BACKEND
                       - --regression-mode
                       - --copy-inputs
+                      - --metrics-log=/var/log/katib/metrics.log
                       - --data-train=DATA_TRAIN
                       - --data-val=DATA_VAL
                       - --data-test=DATA_TEST
@@ -246,7 +254,7 @@ spec:
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 8Gi
+                        memory: 6Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -277,6 +285,7 @@ spec:
                       - --backend=BACKEND
                       - --regression-mode
                       - --copy-inputs
+                      - --metrics-log=/var/log/katib/metrics.log
                       - --data-train=DATA_TRAIN
                       - --data-val=DATA_VAL
                       - --data-test=DATA_TEST
