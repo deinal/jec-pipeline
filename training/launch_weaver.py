@@ -5,6 +5,7 @@ import yaml
 import json
 import kfp
 import time
+import ast 
 
 
 def edit_template(
@@ -12,7 +13,18 @@ def edit_template(
     experiment_name, namespace, 
     s3_bucket, run_id, 
     data_train, data_val, data_test,
-    data_config, network_config):
+    data_config, network_config,
+    worker_replicas, num_cpus,
+    num_gpus, gpu_ids, backend):
+
+    if worker_replicas == '0':
+        with open(src, 'r') as f:
+            template = yaml.load(f, Loader=yaml.FullLoader)
+        
+        del template['spec']['trialTemplate']['trialSpec']['spec']['pytorchReplicaSpecs']['Worker']
+
+        with open(src, 'w') as f:
+            template = yaml.dump(template, f)
 
     with open(src, 'r') as f:
         template = f.read()
@@ -26,6 +38,11 @@ def edit_template(
     template = template.replace('DATA_TEST', data_test)
     template = template.replace('DATA_CONFIG', data_config)
     template = template.replace('NETWORK_CONFIG', network_config)
+    template = template.replace('WORKER_REPLICAS', worker_replicas)
+    template = template.replace('NUM_CPUS', num_cpus)
+    template = template.replace('NUM_GPUS', num_gpus)
+    template = template.replace('GPU_IDS', gpu_ids)
+    template = template.replace('BACKEND', backend)
 
     with open(dst, 'w') as f:
         f.write(template)
@@ -97,6 +114,21 @@ def get_model_path(results, s3_bucket, run_id):
     print('Model path:', model_path)
     return model_path
 
+def get_network_option(results):
+    pair_list = []
+    for pa in results['parameterAssignments']:
+        name = pa['name'].replace("-", "_")
+        value = pa['value']
+        try:
+            ast.literal_eval(pa['value'])
+        except ValueError:
+            value = f'\"{value}\"'
+        pair = f'{name}:{value}'
+        pair_list.append(pair)
+    network_option = ','.join(pair_list)
+    print('Network option:', network_option)
+    return network_option
+
 print('Parse arguments')
 parser = argparse.ArgumentParser(description='Train Params')
 parser.add_argument('--id', type=str)
@@ -107,12 +139,22 @@ parser.add_argument('--data-test', type=str)
 parser.add_argument('--data-config', type=str)
 parser.add_argument('--network-config', type=str)
 parser.add_argument('--delete-experiment', type=str)
+parser.add_argument('--num-replicas', type=int)
+parser.add_argument('--num-cpus', type=int)
+parser.add_argument('--num-gpus', type=int)
 parser.add_argument('--optimal-model-path', type=str)
+parser.add_argument('--network-option', type=str)
 args = parser.parse_args()
-print('Args:', vars(args))
+print('Args:', json.dumps(vars(args), indent=2))
 
 name = f'jec-katib-{args.id}'
 namespace = kfp.Client().get_user_namespace()
+
+backend = 'nccl' if args.num_gpus else ''
+gpu_ids = ','.join(map(str, range(args.num_gpus)))
+worker_replicas = str(args.num_replicas - 1)
+num_cpus = str(args.num_cpus)
+num_gpus=str(args.num_gpus)
 
 edit_template(
     src='template.yaml',
@@ -120,12 +162,17 @@ edit_template(
     experiment_name=name,
     namespace=namespace,
     s3_bucket=args.s3_bucket,
-    run_id=args.id, 
+    run_id=args.id,
     data_train=args.data_train,
     data_val=args.data_val,
     data_test=args.data_test,
     data_config=args.data_config,
     network_config=args.network_config,
+    worker_replicas=worker_replicas,
+    num_cpus=num_cpus,
+    num_gpus=num_gpus,
+    gpu_ids=gpu_ids,
+    backend=backend,
 )
 
 print('Load incluster config')
@@ -136,6 +183,8 @@ k8s_co_client = kubernetes.client.CustomObjectsApi()
 
 print('Create katib experiment')
 create_experiment(k8s_co_client, 'katib_experiment.yaml', namespace)
+
+prev_status = {}
 
 while True:
     time.sleep(5)
@@ -149,7 +198,9 @@ while True:
     )
     
     status = resource['status']
-    print(status)
+    if status != prev_status:
+        print(json.dumps(status, indent=2))
+        prev_status = status
 
     if 'completionTime' in status.keys():
         if status['completionTime']:
@@ -163,6 +214,12 @@ write_results_to_ui(optimal_trial)
 optimal_model_path = get_model_path(optimal_trial, args.s3_bucket, args.id)
 pathlib2.Path(args.optimal_model_path).parent.mkdir(parents=True)
 pathlib2.Path(args.optimal_model_path).write_text(optimal_model_path)
+
+network_option = get_network_option(optimal_trial)
+pathlib2.Path(args.network_option).parent.mkdir(parents=True)
+pathlib2.Path(args.network_option).write_text(network_option)
+
+print('Done')
 
 if args.delete_experiment == 'True':
     delete_experiment(name, namespace)

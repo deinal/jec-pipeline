@@ -7,7 +7,12 @@ import json
 import kfp
 
 
-def edit_template(src, dst, job_name, namespace, pt_path, onnx_path, triton_config):
+def edit_template(
+        src, dst, job_name, namespace, 
+        pt_path, onnx_path, triton_config, 
+        data_config, network_config, network_option
+    ):
+    
     with open(src, 'r') as f:
         template = f.read()
 
@@ -16,6 +21,9 @@ def edit_template(src, dst, job_name, namespace, pt_path, onnx_path, triton_conf
     template = template.replace('PT_PATH', pt_path)
     template = template.replace('ONNX_PATH', onnx_path)
     template = template.replace('TRITON_CONFIG', triton_config)
+    template = template.replace('DATA_CONFIG', data_config)
+    template = template.replace('NETWORK_CONFIG', network_config)
+    template = template.replace('NETWORK_OPTION', network_option)
 
     with open(dst, 'w') as f:
         f.write(template)
@@ -49,10 +57,13 @@ parser = argparse.ArgumentParser(description='Export Params')
 parser.add_argument('--id', type=str)
 parser.add_argument('--s3-bucket', type=str)
 parser.add_argument('--pt-path', type=str)
+parser.add_argument('--network-option', type=str)
+parser.add_argument('--data-config', type=str)
+parser.add_argument('--network-config', type=str)
 parser.add_argument('--delete-job', type=str)
 parser.add_argument('--model-path', type=str)
 args = parser.parse_args()
-print('Args:', vars(args))
+print('Args:', json.dumps(vars(args), indent=2))
 
 name = f'export-job-{args.id}'
 namespace = kfp.Client().get_user_namespace()
@@ -68,7 +79,10 @@ edit_template(
     namespace=namespace,
     pt_path=args.pt_path,
     onnx_path=onnx_path,
-    triton_config=triton_config
+    triton_config=triton_config,
+    data_config=args.data_config,
+    network_config=args.network_config,
+    network_option=args.network_option,
 )
 
 print('Load incluster config')
@@ -79,6 +93,8 @@ k8s_co_client = kubernetes.client.CustomObjectsApi()
 
 print('Create export job')
 create_pytorch_job(k8s_co_client, 'export_job.yaml', namespace)
+
+prev_status = {}
 
 while True:
     time.sleep(5)
@@ -91,12 +107,17 @@ while True:
         name=name
     )
     
-    status = resource['status']
-    print(status)
+    if 'status' in resource.keys():
+        status = resource['status']
+        if status != prev_status:
+            print(json.dumps(status, indent=2))
+            prev_status = status
 
-    if 'succeeded' in status['replicaStatuses']['Master']:
-        print('Export succeeded')
-        break
+        if 'succeeded' in status['replicaStatuses']['Master']:
+            print('Export succeeded')
+            break
+    else:
+        print(resource)
 
 pathlib2.Path(args.model_path).parent.mkdir(parents=True)
 pathlib2.Path(args.model_path).write_text(model_path)
