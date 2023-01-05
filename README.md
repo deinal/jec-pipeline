@@ -32,7 +32,7 @@ docker push registry.cern.ch/ml/jec-serving
 ```
 
 ```
-docker build training/weaver -t registry.cern.ch/ml/weaver
+docker build weaver -t registry.cern.ch/ml/weaver
 docker push registry.cern.ch/ml/weaver
 ```
 
@@ -58,26 +58,6 @@ Navigate to https://ml-staging.cern.ch/_/tensorboards/ and create a Tensorboard 
 
 ![](images/create_tensorboard.png)
 
-Note: until [awslabs/kubeflow-manifests/issues/118](https://github.com/awslabs/kubeflow-manifests/issues/118) is resolved AWS environment variables have to be entered manually:
-
-```
-kubectl edit deployment <tensorboard_name>
-
-        env:
-        - name: S3_ENDPOINT
-          value: s3.cern.ch
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              key: AWS_ACCESS_KEY_ID
-              name: s3-secret
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              key: AWS_SECRET_ACCESS_KEY
-              name: s3-secret
-```
-
 Now the runs are accessible to the deployed Tensorboard
 
 ![](images/tensorboard.png)
@@ -97,6 +77,12 @@ optional arguments:
                         Kubeflow namespace to run pipeline in
   --experiment-name EXPERIMENT_NAME
                         name for KFP experiment on Kubeflow
+  --num-replicas NUM_REPLICAS
+                        number of nodes to train on
+  --num-gpus NUM_GPUS   
+                        number of gpus per node, maximum in the cluster is 1
+  --num-cpus NUM_CPUS   
+                        number of cpus to use (for data loader)
   --data-config DATA_CONFIG
                         data configuration yaml file
   --network-config NETWORK_CONFIG

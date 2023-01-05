@@ -11,6 +11,12 @@ inputs:
     type: String
   - name: pt_path
     type: String
+  - name: network_option
+    type: String
+  - name: data_config
+    type: String
+  - name: network_config
+    type: String
   - name: delete_job
     type: Boolean
 outputs:
@@ -28,6 +34,12 @@ implementation:
       - inputValue: s3_bucket
       - --pt-path
       - inputValue: pt_path
+      - --network-option
+      - inputValue: network_option
+      - --data-config
+      - inputValue: data_config
+      - --network-config
+      - inputValue: network_config
       - --delete-job
       - inputValue: delete_job
       - --model-path
