@@ -26,6 +26,9 @@ def get_pipeline(name, description):
         data_test: str,
         data_config: str,
         network_config: str,
+        num_replicas: int,
+        num_gpus: int,
+        num_cpus: int,
         delete_train_experiment: bool,
         delete_export_job: bool,
     ):
@@ -33,6 +36,9 @@ def get_pipeline(name, description):
         train = train_op(
             id=run_id,
             s3_bucket=s3_bucket,
+            num_replicas=num_replicas,
+            num_gpus=num_gpus,
+            num_cpus=num_cpus,
             data_train=data_train,
             data_val=data_val,
             data_test=data_test,
@@ -44,8 +50,11 @@ def get_pipeline(name, description):
         export = export_op(
             id=run_id,
             s3_bucket=s3_bucket,
+            data_config=data_config,
+            network_config=network_config,
             delete_job=delete_export_job,
             pt_path=train.outputs['optimal_model_path'],
+            network_option=train.outputs['network_option'],
         )
 
         serve = serve_op(
@@ -60,18 +69,24 @@ if __name__ == '__main__':
     parser.add_argument('--namespace', type=str, default='dholmber', 
                         help='Kubeflow namespace to run pipeline in')
     parser.add_argument('--experiment-name', type=str, default='jec-experiment', 
-                        help='name for KFP experiment on Kubeflow')                    
+                        help='name for KFP experiment on Kubeflow')
+    parser.add_argument('--num-replicas', type=int, default=1,
+                        help='number of nodes to train on')
+    parser.add_argument('--num-gpus', type=int, default=0,
+                        help='number of gpus per node, maximum in the cluster is 1')
+    parser.add_argument('--num-cpus', type=int, default=1, 
+                        help='number of cpus to use (for data loader)')                       
     parser.add_argument('--data-config', type=str, default='data/jec_pfn.yaml', 
                         help='data configuration yaml file')
     parser.add_argument('--network-config', type=str, default='networks/pfn_regressor.py', 
                         help='network architecture configuration file')
     parser.add_argument('--s3-bucket', type=str, default='s3://jec-data', 
                         help='s3 bucket used by the pipeline for storing models and tensorboard log dirs')
-    parser.add_argument('--data-train', type=str, default='s3://jec-data/train/*.root',
+    parser.add_argument('--data-train', type=str, default='a:s3://jec-data/train/001.root,b:s3://jec-data/train/002.root',
                         help='training data')
-    parser.add_argument('--data-val', type=str, default='s3://jec-data/val/*.root',
+    parser.add_argument('--data-val', type=str, default='s3://jec-data/val/100.root',
                         help='validation data')
-    parser.add_argument('--data-test', type=str, default='s3://jec-data/test/*.root',
+    parser.add_argument('--data-test', type=str, default='s3://jec-data/test/120.root',
                         help='test data')
     parser.add_argument('--delete-train-experiment', action='store_true', default=False,
                         help='whether or not to delete the hp tuning experiment once finished')
@@ -122,6 +137,9 @@ if __name__ == '__main__':
             'data_test': args.data_test,
             'data_config': args.data_config,
             'network_config': args.network_config,
+            'num_replicas': args.num_replicas,
+            'num_gpus': args.num_gpus,
+            'num_cpus': args.num_cpus,
             'delete_train_experiment': args.delete_train_experiment,
             'delete_export_job': args.delete_export_job,
         }
