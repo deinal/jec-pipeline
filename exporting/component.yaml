@@ -24,7 +24,7 @@ outputs:
     type: String
 implementation:
   container:
-    image: registry.cern.ch/ml/jec-exporting:latest
+    image: registry.cern.ch/ml/jec-exporting@sha256:e89bcecc779d5b0a03be980abdca72864086e320229949a1e9997fbfb4f293a3
     command:
       - python3
       - export_model.py

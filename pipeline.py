@@ -72,21 +72,21 @@ if __name__ == '__main__':
                         help='name for KFP experiment on Kubeflow')
     parser.add_argument('--num-replicas', type=int, default=1,
                         help='number of nodes to train on')
-    parser.add_argument('--num-gpus', type=int, default=0,
+    parser.add_argument('--num-gpus', type=int, default=1,
                         help='number of gpus per node, maximum in the cluster is 1')
     parser.add_argument('--num-cpus', type=int, default=1, 
                         help='number of cpus to use (for data loader)')                       
-    parser.add_argument('--data-config', type=str, default='data/jec_pfn.yaml', 
+    parser.add_argument('--data-config', type=str, default='data/jec_pfn_open.yaml', 
                         help='data configuration yaml file')
-    parser.add_argument('--network-config', type=str, default='networks/pfn_regressor.py', 
+    parser.add_argument('--network-config', type=str, default='networks/pfn_regressor_open.py', 
                         help='network architecture configuration file')
     parser.add_argument('--s3-bucket', type=str, default='s3://jec-data', 
                         help='s3 bucket used by the pipeline for storing models and tensorboard log dirs')
-    parser.add_argument('--data-train', type=str, default='a:s3://jec-data/train/001.root,b:s3://jec-data/train/002.root',
+    parser.add_argument('--data-train', type=str, default='s3://jec-data/open/train/*.root',
                         help='training data')
-    parser.add_argument('--data-val', type=str, default='s3://jec-data/val/100.root',
+    parser.add_argument('--data-val', type=str, default='s3://jec-data/open/val/*.root',
                         help='validation data')
-    parser.add_argument('--data-test', type=str, default='s3://jec-data/test/120.root',
+    parser.add_argument('--data-test', type=str, default='s3://jec-data/open/test/*.root',
                         help='test data')
     parser.add_argument('--delete-train-experiment', action='store_true', default=False,
                         help='whether or not to delete the hp tuning experiment once finished')
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     network = args.network_config.split("/")[-1].split(".py")[0].replace('_', '-')
     run_id = f'{network}-{uuid.uuid4().hex[:6]}'
     pipeline_name = f'jec-pipeline-{run_id}'
-    package_path = f'{pipeline_name}.tar.gz'
+    package_path = f'packages/{pipeline_name}.tar.gz'
 
     # Import pipeline components
     train_op = kfp.components.load_component_from_file('training/component.yaml')
@@ -109,14 +109,14 @@ if __name__ == '__main__':
     # Get pipeline instance
     pipeline = get_pipeline(pipeline_name, description)
 
-    # Load cookies to access Kubeflow at CERN
-    cookies = load_cookies(cookie_file='cookies.txt', domain='ml-staging.cern.ch')
-    
-    # Load Kubeflow pipeline client
-    client = kfp.Client(host='https://ml-staging.cern.ch/pipeline', cookies=cookies)
-
     # Compile pipeline
     kfp.compiler.Compiler().compile(pipeline_func=pipeline, package_path=package_path)
+
+    # Load cookies to access Kubeflow at CERN
+    cookies = load_cookies(cookie_file='cookies.txt', domain='ml.cern.ch')
+    
+    # Load Kubeflow pipeline client
+    client = kfp.Client(host='https://ml.cern.ch/pipeline', cookies=cookies)
 
     # Upload pipeline 
     client.upload_pipeline(pipeline_package_path=package_path, pipeline_name=pipeline_name, description=description)

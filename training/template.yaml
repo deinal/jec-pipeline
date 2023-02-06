@@ -4,8 +4,8 @@ metadata:
   name: EXPERIMENT_NAME
   namespace: NAMESPACE
 spec:
-  parallelTrialCount: 2
-  maxTrialCount: 6
+  parallelTrialCount: 5
+  maxTrialCount: 30
   maxFailedTrialCount: 1
   objective:
     type: minimize
@@ -96,7 +96,7 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "60"
+          - "50"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
@@ -180,7 +180,7 @@ spec:
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 6Gi
+                        memory: 12Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -254,7 +254,7 @@ spec:
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 6Gi
+                        memory: 12Gi
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
