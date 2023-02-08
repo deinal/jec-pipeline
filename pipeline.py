@@ -29,6 +29,7 @@ def get_pipeline(name, description):
         num_replicas: int,
         num_gpus: int,
         num_cpus: int,
+        memory: str,
         delete_train_experiment: bool,
         delete_export_job: bool,
     ):
@@ -39,6 +40,7 @@ def get_pipeline(name, description):
             num_replicas=num_replicas,
             num_gpus=num_gpus,
             num_cpus=num_cpus,
+            memory=memory,
             data_train=data_train,
             data_val=data_val,
             data_test=data_test,
@@ -73,9 +75,11 @@ if __name__ == '__main__':
     parser.add_argument('--num-replicas', type=int, default=1,
                         help='number of nodes to train on')
     parser.add_argument('--num-gpus', type=int, default=1,
-                        help='number of gpus per node, maximum in the cluster is 1')
+                        help='number of gpus per node, limit is 1')
     parser.add_argument('--num-cpus', type=int, default=1, 
-                        help='number of cpus to use (for data loader)')                       
+                        help='number of cpus to use')
+    parser.add_argument('--memory', type=str, default='6Gi', 
+                        help='memory in gigabyte')                    
     parser.add_argument('--data-config', type=str, default='data/jec_pfn_open.yaml', 
                         help='data configuration yaml file')
     parser.add_argument('--network-config', type=str, default='networks/pfn_regressor_open.py', 
@@ -140,6 +144,7 @@ if __name__ == '__main__':
             'num_replicas': args.num_replicas,
             'num_gpus': args.num_gpus,
             'num_cpus': args.num_cpus,
+            'memory': args.memory,
             'delete_train_experiment': args.delete_train_experiment,
             'delete_export_job': args.delete_export_job,
         }

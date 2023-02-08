@@ -24,6 +24,8 @@ inputs:
     type: Integer
   - name: num_cpus
     type: Integer
+  - name: memory
+    type: String
   - name: delete_experiment
     type: Boolean
 outputs:
@@ -35,7 +37,7 @@ outputs:
     type: UI metadata
 implementation:
   container:
-    image: registry.cern.ch/ml/jec-training@sha256:631ded8301e9cc0ba260d090c8cdb48930a0e2cda42a5cb15c0868dbb59f15ef
+    image: registry.cern.ch/ml/jec-training@sha256:8d6530bc56f1ac82797863ccd6065dc6a865a7f937a786b314d423b307afb0d4
     command:
       - python3
       - launch_weaver.py
@@ -59,6 +61,8 @@ implementation:
       - inputValue: num_gpus
       - --num-cpus
       - inputValue: num_cpus
+      - --memory
+      - inputValue: memory
       - --delete-experiment
       - inputValue: delete_experiment
       - --optimal-model-path

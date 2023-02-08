@@ -20,7 +20,7 @@ RUN export PATH=/ml/.local/bin:$PATH && \
 
 RUN git clone https://github.com/deinal/weaver.git && \
     cd weaver && \
-    git checkout 9c1cdcb
+    git checkout 38b2a55
 
 WORKDIR /ml/weaver
 

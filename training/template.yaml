@@ -172,13 +172,13 @@ spec:
                   - name: pytorch
                     resources: 
                       limits:
-                        nvidia.com/gpu: NUM_GPUS
+                        nvidia.com/gpu: 1
                         cpu: 4
                         memory: 12Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 12Gi
+                        memory: MEMORY
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -246,13 +246,13 @@ spec:
                   - name: pytorch
                     resources: 
                       limits:
-                        nvidia.com/gpu: NUM_GPUS
+                        nvidia.com/gpu: 1
                         cpu: 4
                         memory: 12Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 12Gi
+                        memory: MEMORY
                     volumeMounts:
                       - name: eos
                         mountPath: /eos

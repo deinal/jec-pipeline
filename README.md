@@ -62,6 +62,29 @@ Now the runs are accessible to the deployed Tensorboard
 
 ![](images/tensorboard.png)
 
+Note: until [awslabs/kubeflow-manifests/issues/118](https://github.com/awslabs/kubeflow-manifests/issues/118) is resolved AWS environment variables have to be entered manually:
+
+```
+kubectl edit deployment <tensorboard_name>
+
+        env:
+        - name: S3_ENDPOINT
+          value: s3.cern.ch
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              key: AWS_ACCESS_KEY_ID
+              name: s3-secret
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              key: AWS_SECRET_ACCESS_KEY
+              name: s3-secret
+```
+
+should be fixed in https://its.cern.ch/jira/browse/OS-15903
+
+
 ## Run Pipeline
 
 Install [kfp](https://www.kubeflow.org/docs/components/pipelines/sdk/install-sdk), e.g. on lxplus8: `pip3 install kfp`
@@ -100,3 +123,27 @@ optional arguments:
   --delete-export-job
                         whether or not to delete the export job once finished
 ```
+
+# Katib experiment
+
+python3 pipeline.py \
+  --data-config=data/jec_pfn_open.yaml \
+  --network-config=networks/pfn_regressor_open.py \
+  --data-train=s3://jec-data/open/katib/train/*.root \
+  --data-val=s3://jec-data/open/katib/val/*.root \
+  --data-test=s3://jec-data/open/katib/test/*.root \
+  --memory=8Gi --num-gpus=1 --num-cpus=1 --num-replicas=1 \
+  --experiment-name=jec-production
+
+python3 pipeline.py \
+  --data-config=data/jec_particle_net_open.yaml \
+  --network-config=networks/particle_net_regressor_open.py \
+  --data-train=s3://jec-data/open/katib/train/*.root \
+  --data-val=s3://jec-data/open/katib/val/*.root \
+  --data-test=s3://jec-data/open/katib/test/*.root \
+  --memory=8Gi --num-gpus=1 --num-cpus=1 --num-replicas=1 \
+  --experiment-name=jec-production
+
+## Distributed training
+
+PytorchJob injects MASTER_HOST, MASTER_PORT, WORLD_SIZE, RANK
