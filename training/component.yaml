@@ -37,7 +37,7 @@ outputs:
     type: UI metadata
 implementation:
   container:
-    image: registry.cern.ch/ml/jec-training@sha256:8d6530bc56f1ac82797863ccd6065dc6a865a7f937a786b314d423b307afb0d4
+    image: registry.cern.ch/ml/jec-training@sha256:b57bb862380286b8639e9e8d1ed28d672450417f2675b77b11c4d48ad8de46b9
     command:
       - python3
       - launch_weaver.py
