@@ -4,7 +4,7 @@ metadata:
   name: EXPERIMENT_NAME
   namespace: NAMESPACE
 spec:
-  parallelTrialCount: 5
+  parallelTrialCount: 2
   maxTrialCount: 30
   maxFailedTrialCount: 1
   objective:
