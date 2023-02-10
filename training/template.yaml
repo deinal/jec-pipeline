@@ -4,7 +4,7 @@ metadata:
   name: EXPERIMENT_NAME
   namespace: NAMESPACE
 spec:
-  parallelTrialCount: 3
+  parallelTrialCount: 5
   maxTrialCount: 30
   maxFailedTrialCount: 1
   objective:
@@ -174,7 +174,7 @@ spec:
                       limits:
                         nvidia.com/gpu: 1
                         cpu: 4
-                        memory: 12Gi
+                        memory: 16Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
@@ -248,7 +248,7 @@ spec:
                       limits:
                         nvidia.com/gpu: 1
                         cpu: 4
-                        memory: 12Gi
+                        memory: 16Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS

@@ -132,7 +132,7 @@ python3 pipeline.py \
   --data-train=s3://jec-data/open/katib/train/*.root \
   --data-val=s3://jec-data/open/katib/val/*.root \
   --data-test=s3://jec-data/open/katib/test/*.root \
-  --memory=10Gi --num-gpus=1 --num-cpus=1 --num-replicas=2 \
+  --memory=12Gi --num-gpus=1 --num-cpus=1 --num-replicas=1 \
   --experiment-name=jec-production
 
 python3 pipeline.py \
@@ -141,7 +141,7 @@ python3 pipeline.py \
   --data-train=s3://jec-data/open/katib/train/*.root \
   --data-val=s3://jec-data/open/katib/val/*.root \
   --data-test=s3://jec-data/open/katib/test/*.root \
-  --memory=10Gi --num-gpus=1 --num-cpus=1 --num-replicas=2 \
+  --memory=12Gi --num-gpus=1 --num-cpus=1 --num-replicas=1 \
   --experiment-name=jec-production
 
 ## Distributed training
