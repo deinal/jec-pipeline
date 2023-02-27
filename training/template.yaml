@@ -101,7 +101,7 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "500"
+          - "100"
     - name: data-fraction
       parameterType: categorical
       feasibleSpace:
