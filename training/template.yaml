@@ -9,13 +9,13 @@ spec:
   maxFailedTrialCount: 1
   objective:
     type: minimize
-    objectiveMetricName: Loss
+    objectiveMetricName: AvgLoss
     additionalMetricNames:
-      - AvgLoss
-      - MSE
+      - Loss
       - AvgMSE
-      - MAE
+      - MSE
       - AvgMAE
+      - MAE
   algorithm:
     algorithmName: random
   metricsCollectorSpec:
@@ -75,12 +75,12 @@ spec:
       parameterType: double
       feasibleSpace:
         min: "0.0"
-        max: "0.5"
+        max: "0.2"
     - name: start-lr
       parameterType: double
       feasibleSpace:
-        min: "1.0e-5"
-        max: "1.0e-2"
+        min: "5.0e-5"
+        max: "5.0e-3"
     - name: optimizer
       parameterType: categorical
       feasibleSpace:

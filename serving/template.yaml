@@ -18,3 +18,4 @@ spec:
         requests:
           cpu:      1
           memory:   10Mi
+      runtimeVersion: 21.09-py3
