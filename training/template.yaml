@@ -34,15 +34,11 @@ spec:
       feasibleSpace:
         list:
           - "1"
-          - "2"
-          - "3"
     - name: k
       parameterType: discrete
       feasibleSpace:
         list:
-          - "4"
-          - "8"
-          - "16"
+          - "1"
     - name: num-conv-layers
       parameterType: discrete
       feasibleSpace:
@@ -50,6 +46,8 @@ spec:
           - "1"
           - "2"
           - "3"
+          - "4"
+          - "5"
     - name: conv-dim
       parameterType: discrete
       feasibleSpace:
@@ -57,6 +55,7 @@ spec:
           - "50"
           - "100"
           - "200"
+          - "400"
     - name: num-fc-layers
       parameterType: discrete
       feasibleSpace:
@@ -64,6 +63,8 @@ spec:
           - "1"
           - "2"
           - "3"
+          - "4"
+          - "5"
     - name: fc-dim
       parameterType: discrete
       feasibleSpace:
@@ -71,6 +72,7 @@ spec:
           - "50"
           - "100"
           - "200"
+          - "400"
     - name: dropout
       parameterType: double
       feasibleSpace:
