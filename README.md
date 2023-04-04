@@ -8,13 +8,13 @@ The pipeline consists of three steps: 1. perform HP tuning with Katib, 2. export
 
 ### AutoML experiment
 
-The first step is an AutoML experiment that can be monitored on https://ml.cern.ch/_/katib. It consists of a hierarchy of Kubernetes custom resources with Experiment being the highest, submitting multiple parallel random search Trials, which in turn creates PyTorchJobs that spawns the amount of workers specified in the `training.yaml` file. A [customized version of the deep learning framework Weaver](https://github.com/deinal/weaver/tree/dev/jet-energy-corrections) is used for the training itself, changes include S3 communication and the creation of ONNX configuration files.  To learn more about PyTorchJobs there are examples available in the official Kubeflow [training-operator repository](https://github.com/kubeflow/training-operator/tree/master/examples/pytorch), or in the IT department's own [repository](https://gitlab.cern.ch/ai-ml/examples).
+The first step is an AutoML experiment that can be monitored on https://ml.cern.ch/_/katib. It consists of a hierarchy of Kubernetes custom resources with Experiment being the highest, submitting multiple parallel random search Trials, which in turn creates PyTorchJobs that spawns the amount of workers specified in the `training/template.yaml` file. A [customized version of the deep learning framework Weaver](https://github.com/deinal/weaver/tree/dev/jet-energy-corrections) is used for the training itself, changes include S3 communication and the creation of ONNX configuration files.  To learn more about PyTorchJobs there are examples available in the official Kubeflow [training-operator repository](https://github.com/kubeflow/training-operator/tree/master/examples/pytorch), or in the IT department's own [repository](https://gitlab.cern.ch/ai-ml/examples).
 
-<img src="images/katib.png" width="600px"/>
+<img src="images/experiment.png" width="600px"/>
 
 ### Model exportation
 
-The export step runs as a PyTorchJob specified in `exporting/template.yaml`. It gets the path to the optimal model from the previous step, in addition to data/network configurations plus the output ONNX path and config file for serving. A full description of model is available [here](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/model_configuration.html), and [here](https://github.com/triton-inference-server/onnxruntime_backend).
+The export step runs as a PyTorchJob specified in `exporting/template.yaml`. It gets the path to the optimal model from the previous step, in addition to data/network configurations plus the output ONNX path and `config.pbtxt` file for serving. A full description of model configuration is available [here](https://docs.nvidia.com/deeplearning/triton-inference-server/user-guide/docs/user_guide/model_configuration.html), and [here](https://github.com/triton-inference-server/onnxruntime_backend).
 
 ```
 s3://jec-data/<run-id>/
@@ -26,15 +26,15 @@ s3://jec-data/<run-id>/
 
 ### Serving
 
-Models are served with KServe using NVIDIA Triton as the predictor, or backend. The InferenceService is defined in `serving/template.yaml`. Model files and configs are read from S3 storage and placed in a predictor pod. Deployed models appear on Kubeflow at https://ml.cern.ch/_/models/. Docs on serving with KServe utilizing Triton [is available for TorchScript](https://kserve.github.io/website/0.10/modelserving/v1beta1/triton/torchscript/), but not ONNX Runtime as of yet. However, it is a very similar setup. The comlete analysis of model througput and the models performance on energy calibration is hosted here: https://gitlab.cern.ch/dholmber/jec-inference.
+Models are served with KServe using NVIDIA Triton as the predictor, or backend. The InferenceService is defined in `serving/template.yaml`. Model files and configs are read from S3 storage and placed in a predictor pod. Deployed models appear on Kubeflow at https://ml.cern.ch/_/models/. Docs on serving with KServe utilizing Triton [is available for TorchScript](https://kserve.github.io/website/0.10/modelserving/v1beta1/triton/torchscript/), but not ONNX Runtime as of yet. However, it is a very similar setup.
 
 <img src="images/serving.png" width="600px"/>
 
 ## Setup
 
-The workspace was set up on a virtual machine (VM) hosted on CERN OpenStack Infrastructure. Instructions for creating a VM can be found [here](https://clouddocs.web.cern.ch/), and a step-by-step writeup is available [here](https://gitlab.cern.ch/dholmber/vm-setup) as well. 
+The workspace was set up on a virtual machine (VM) hosted on CERN OpenStack Infrastructure. Instructions for creating a VM can be found [here](https://clouddocs.web.cern.ch/), and a step-by-step writeup for this specific usecase is available [here](https://gitlab.cern.ch/dholmber/vm-setup) as well. 
 
-Kubeflow is locked behind CERN single sign on. A [CLI tool](https://gitlab.cern.ch/authzsvc/tools/auth-get-sso-cookie) generates cookies needed to bypass the SSO when submitting pipeline runs.
+Kubeflow is locked behind CERN single sign on. A [CLI tool](https://gitlab.cern.ch/authzsvc/tools/auth-get-sso-cookie) can generate cookies needed to bypass the SSO when submitting pipeline runs. Remember to authenticate with `kinit` first.
 ```
 auth-get-sso-cookie -u https://ml.cern.ch -o cookies.txt
 ```
@@ -48,7 +48,7 @@ Use the credentials from the user profile on Harbor to log in to the registry.
 docker login registry.cern.ch
 ```
 
-Once you have a project set up on some container registry, you can push changes in the pipeline there.
+Once you have a project set up on some container registry, you can push changes in each pipeline step there.
 
 ```
 docker build training -t registry.cern.ch/ml/jec-training
@@ -105,13 +105,13 @@ kubectl create secret generic krb-secret --from-file=/tmp/krb5cc_1000
 
 Request a bucket on CERN Object Store, instructions [here](https://clouddocs.web.cern.ch/object_store/index.html).
 
-Create S3 secret on Kubeflow
-  - Put aws secrets into `secret.yaml` (e.g. from `openstack ec2 credentials list`)
+Create S3 secret on Kubeflow:
+  - Put AWS secrets into `secret.yaml` (e.g. from `openstack ec2 credentials list`)
   - `kubectl apply -f secret.yaml`
 
 ## OpenData
 
-QCD sample downloaded from http://opendata.cern.ch/record/12100. In total, 1.42M jets are used: 60% training, 20% validation, and 20% test splits. The following ROOT files were used:
+QCD sample downloaded from http://opendata.cern.ch/record/12100 and stored in an S3 bucket. In total, 1.42M jets are used: 60% training, 20% validation, and 20% test splits. The following ROOT files were used:
 
 ```
 $ s3cmd ls s3://jec-data/open/katib/train/
@@ -133,7 +133,7 @@ s3://jec-data/open/katib/test/JetNtuple_RunIISummer16_13TeV_MC_96.root
 
 ## Run Pipeline
 
-Install [kfp](https://www.kubeflow.org/docs/components/pipelines/sdk/install-sdk) e.g.: `pip3 install kfp`
+Install [kfp](https://www.kubeflow.org/docs/components/pipelines/sdk/install-sdk) e.g. `pip3 install kfp`
 
 To run a default pipeline:
 ```
@@ -233,6 +233,12 @@ $ kubectl edit deployment <tensorboard_name>
 Now the runs are accessible to the deployed Tensorboard.
 
 <img src="images/tensorboard.png" width="600px"/>
+
+## Results
+
+The comlete analysis of model througput and the models performance on energy calibration is hosted here: https://gitlab.cern.ch/dholmber/jec-inference.
+
+<img src="images/katib.png" width="600px"/>
 
 ## Useful references
 
