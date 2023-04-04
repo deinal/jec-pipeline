@@ -11,7 +11,7 @@ inputs:
     type: String
 implementation:
   container:
-    image: registry.cern.ch/ml/jec-serving:latest
+    image: registry.cern.ch/ml/jec-serving@sha256:2a86bb422057b8fb67e41440060a4ecc06a063ccb413d05e73052c6f59aee7f1
     command:
       - python3
       - serve_model.py

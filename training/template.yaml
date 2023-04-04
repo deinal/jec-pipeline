@@ -4,18 +4,18 @@ metadata:
   name: EXPERIMENT_NAME
   namespace: NAMESPACE
 spec:
-  parallelTrialCount: 2
-  maxTrialCount: 6
+  parallelTrialCount: 5
+  maxTrialCount: 30
   maxFailedTrialCount: 1
   objective:
     type: minimize
-    objectiveMetricName: Loss
+    objectiveMetricName: AvgLoss
     additionalMetricNames:
-      - AvgLoss
-      - MSE
+      - Loss
       - AvgMSE
-      - MAE
+      - MSE
       - AvgMAE
+      - MAE
   algorithm:
     algorithmName: random
   metricsCollectorSpec:
@@ -77,12 +77,12 @@ spec:
       parameterType: double
       feasibleSpace:
         min: "0.0"
-        max: "0.5"
+        max: "0.2"
     - name: start-lr
       parameterType: double
       feasibleSpace:
-        min: "1.0e-5"
-        max: "1.0e-2"
+        min: "5.0e-5"
+        max: "5.0e-3"
     - name: optimizer
       parameterType: categorical
       feasibleSpace:
@@ -96,12 +96,12 @@ spec:
       parameterType: discrete
       feasibleSpace:
         list:
-          - "60"
+          - "50"
     - name: batch-size
       parameterType: discrete
       feasibleSpace:
         list:
-          - "500"
+          - "100"
     - name: data-fraction
       parameterType: categorical
       feasibleSpace:
@@ -174,13 +174,13 @@ spec:
                   - name: pytorch
                     resources: 
                       limits:
-                        nvidia.com/gpu: NUM_GPUS
+                        nvidia.com/gpu: 1
                         cpu: 4
-                        memory: 12Gi
+                        memory: 16Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 6Gi
+                        memory: MEMORY
                     volumeMounts:
                       - name: eos
                         mountPath: /eos
@@ -248,13 +248,13 @@ spec:
                   - name: pytorch
                     resources: 
                       limits:
-                        nvidia.com/gpu: NUM_GPUS
+                        nvidia.com/gpu: 1
                         cpu: 4
-                        memory: 12Gi
+                        memory: 16Gi
                       requests:
                         nvidia.com/gpu: NUM_GPUS
                         cpu: NUM_CPUS
-                        memory: 6Gi
+                        memory: MEMORY
                     volumeMounts:
                       - name: eos
                         mountPath: /eos

@@ -14,7 +14,7 @@ def edit_template(
     s3_bucket, run_id, 
     data_train, data_val, data_test,
     data_config, network_config,
-    worker_replicas, num_cpus,
+    worker_replicas, memory, num_cpus,
     num_gpus, gpu_ids, backend):
 
     if worker_replicas == '0':
@@ -39,6 +39,7 @@ def edit_template(
     template = template.replace('DATA_CONFIG', data_config)
     template = template.replace('NETWORK_CONFIG', network_config)
     template = template.replace('WORKER_REPLICAS', worker_replicas)
+    template = template.replace('MEMORY', memory)
     template = template.replace('NUM_CPUS', num_cpus)
     template = template.replace('NUM_GPUS', num_gpus)
     template = template.replace('GPU_IDS', gpu_ids)
@@ -140,6 +141,7 @@ parser.add_argument('--data-config', type=str)
 parser.add_argument('--network-config', type=str)
 parser.add_argument('--delete-experiment', type=str)
 parser.add_argument('--num-replicas', type=int)
+parser.add_argument('--memory', type=str)
 parser.add_argument('--num-cpus', type=int)
 parser.add_argument('--num-gpus', type=int)
 parser.add_argument('--optimal-model-path', type=str)
@@ -169,6 +171,7 @@ edit_template(
     data_config=args.data_config,
     network_config=args.network_config,
     worker_replicas=worker_replicas,
+    memory=args.memory,
     num_cpus=num_cpus,
     num_gpus=num_gpus,
     gpu_ids=gpu_ids,
