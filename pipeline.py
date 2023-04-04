@@ -78,7 +78,7 @@ if __name__ == '__main__':
                         help='number of gpus per node, limit is 1')
     parser.add_argument('--num-cpus', type=int, default=1, 
                         help='number of cpus to use')
-    parser.add_argument('--memory', type=str, default='6Gi', 
+    parser.add_argument('--memory', type=str, default='12Gi', 
                         help='memory in gigabyte')                    
     parser.add_argument('--data-config', type=str, default='data/jec_pfn_open.yaml', 
                         help='data configuration yaml file')
